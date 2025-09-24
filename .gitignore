@@ -35,3 +35,13 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Spring Boot 환경설정
+application.yml
+application-*.yml
+application.properties
+application-*.properties
+
+# Docker 설정
+docker-compose.yml
+docker-compose.*.yml

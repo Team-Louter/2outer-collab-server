@@ -2,3 +2,8 @@ spring:
   application:
     name:
       Collab
+  datasource:
+    url: jdbc:mysql://localhost:3306/collab
+    username: root
+    password: ehdus0509!!
+    driver-class-name: com.mysql.cj.jdbc.Driver
