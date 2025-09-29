@@ -5,7 +5,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.util.Date;
 
-public class JwtTokenProvider extends JwtUtil{
+public class JwtTokenProvider extends JwtUtil {
 
     public JwtTokenProvider(String secretKey, long expiration) {
         super(secretKey, expiration);

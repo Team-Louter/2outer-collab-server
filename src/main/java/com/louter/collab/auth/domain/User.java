@@ -31,7 +31,7 @@ public class User {
     private String userPassword;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)ㅁ
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp

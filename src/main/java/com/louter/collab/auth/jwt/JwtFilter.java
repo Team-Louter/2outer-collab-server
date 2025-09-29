@@ -24,7 +24,6 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String path = request.getRequestURI();
 
-        // 인증이 필요 없는 경로들
         if(path.equals("/favicon.ico") ||
                 path.startsWith("/.well-known/") ||
                 path.equals("/") ||

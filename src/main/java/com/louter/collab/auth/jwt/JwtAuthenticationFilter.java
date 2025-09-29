@@ -9,7 +9,6 @@ import io.jsonwebtoken.Jwts;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-@Component
 public class JwtAuthenticationFilter extends JwtUtil{
 
     public JwtAuthenticationFilter(String secretKey, long expiration) {
