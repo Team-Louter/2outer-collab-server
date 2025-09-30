@@ -3,6 +3,7 @@ package com.louter.collab.team.repository;
 import com.louter.collab.team.domain.UserTeam;
 import com.louter.collab.team.domain.UserTeamId;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -25,4 +26,9 @@ public interface UserTeamRepository extends JpaRepository<UserTeam, UserTeamId> 
     
     @Query("SELECT ut FROM UserTeam ut WHERE ut.teamId = :teamId AND ut.role = 'admin'")
     List<UserTeam> findAdminsByTeamId(@Param("teamId") Long teamId);
+    
+    // 팀 삭제시 해당 팀의 모든 UserTeam 관계를 삭제하는 메서드 추가
+    @Modifying
+    @Query("DELETE FROM UserTeam ut WHERE ut.teamId = :teamId")
+    void deleteByTeamId(@Param("teamId") Long teamId);
 }

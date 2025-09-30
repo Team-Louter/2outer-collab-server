@@ -83,16 +83,26 @@ public class TeamService {
         UserTeam userTeam = userTeamRepository.findByUserIdAndTeamId(userId, teamId)
                 .orElseThrow(() -> new RuntimeException("팀 멤버를 찾을 수 없습니다."));
 
-        // admin이 혼자 남은 경우 팀 삭제 또는 다른 처리 로직 추가 가능
+        // 마지막 admin인지 확인
         List<UserTeam> admins = userTeamRepository.findAdminsByTeamId(teamId);
         if (admins.size() == 1 && admins.get(0).getUserId().equals(userId)) {
-            // 마지막 admin이 탈퇴하는 경우의 처리
+            // 마지막 admin이 탈퇴하는 경우
             List<UserTeam> allMembers = userTeamRepository.findByTeamId(teamId);
+        
             if (allMembers.size() > 1) {
+                // 다른 멤버가 있으면 탈퇴 불가
                 throw new RuntimeException("다른 사용자를 admin으로 지정한 후 탈퇴하세요.");
+            } else {
+                // 혼자 남은 경우 팀 자체를 삭제
+                // 먼저 UserTeam 관계를 모두 삭제 (cascade로 자동 삭제될 수도 있지만 명시적으로 삭제)
+                userTeamRepository.deleteByTeamId(teamId);
+                // 그 다음 팀을 삭제
+                teamRepository.deleteById(teamId);
+                return; // 팀이 삭제되었으므로 개별 userTeam 삭제 불필요
             }
         }
 
+        // 일반적인 탈퇴 처리
         userTeamRepository.delete(userTeam);
     }
 

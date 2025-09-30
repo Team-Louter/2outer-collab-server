@@ -29,17 +29,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers(
-                    "/swagger-ui/**", 
-                    "/swagger-ui.html",
-                    "/v3/api-docs/**",
-                    "/api-docs/**",
-                    "/swagger-resources/**",
-                    "/webjars/**",
-                    "/auth/**",
-                    "/email/**"
-                ).permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()  // 모든 요청 허용
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .csrf(AbstractHttpConfigurer::disable)
