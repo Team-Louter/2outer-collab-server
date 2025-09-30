@@ -91,15 +91,10 @@ public class TeamService {
         
             if (allMembers.size() > 1) {
                 // 다른 멤버가 있으면 탈퇴 불가
-                throw new RuntimeException("다른 사용자를 admin으로 지정한 후 탈퇴하세요.");
-            } else {
-                // 혼자 남은 경우 팀 자체를 삭제
-                // 먼저 UserTeam 관계를 모두 삭제 (cascade로 자동 삭제될 수도 있지만 명시적으로 삭제)
-                userTeamRepository.deleteByTeamId(teamId);
-                // 그 다음 팀을 삭제
-                teamRepository.deleteById(teamId);
-                return; // 팀이 삭제되었으므로 개별 userTeam 삭제 불필요
+                throw new RuntimeException("다른 사용자를 admin으로 지정한 후 탈퇴하거나, 팀 삭제 기능을 사용하세요.");
             }
+            // 혼자 남은 경우에도 명시적 삭제를 위해 탈퇴 불가로 변경
+            throw new RuntimeException("마지막 멤버입니다. 팀 삭제 기능을 사용해주세요.");
         }
 
         // 일반적인 탈퇴 처리
@@ -171,5 +166,28 @@ public class TeamService {
         return userTeamRepository.findByUserIdAndTeamId(userId, teamId)
                 .map(UserTeam::getRole)
                 .orElse(null);
+    }
+
+    @Transactional
+    public void deleteTeam(Long teamId, String teamNameConfirmation, Long requesterId) {
+        // 요청자가 admin인지 확인
+        if (!isUserAdmin(requesterId, teamId)) {
+            throw new RuntimeException("팀 삭제 권한이 없습니다. 어드민만 팀을 삭제할 수 있습니다.");
+        }
+
+        // 팀 존재 여부 확인
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new RuntimeException("팀을 찾을 수 없습니다."));
+
+        // 팀 이름 확인
+        if (!team.getTeamName().equals(teamNameConfirmation)) {
+            throw new RuntimeException("팀 이름이 일치하지 않습니다. 정확한 팀 이름을 입력해주세요.");
+        }
+
+        // 팀의 모든 UserTeam 관계 삭제
+        userTeamRepository.deleteByTeamId(teamId);
+        
+        // 팀 삭제
+        teamRepository.deleteById(teamId);
     }
 }

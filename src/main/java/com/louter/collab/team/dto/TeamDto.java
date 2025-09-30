@@ -3,6 +3,7 @@ package com.louter.collab.team.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 public class TeamDto {
@@ -100,5 +101,15 @@ public class TeamDto {
         
         @Schema(description = "현재 사용자의 역할", example = "admin", allowableValues = {"admin", "user"})
         private String userRole;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(description = "팀 삭제 요청")
+    public static class DeleteRequest {
+        @NotBlank(message = "팀 이름을 입력해주세요.")
+        @Schema(description = "삭제할 팀의 이름 (확인용)", example = "개발팀", required = true)
+        private String teamNameConfirmation;
     }
 }

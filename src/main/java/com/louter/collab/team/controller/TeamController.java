@@ -8,8 +8,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -159,5 +161,25 @@ public class TeamController {
             @RequestParam Long userId) {
         boolean isAdmin = teamService.isUserAdmin(userId, teamId);
         return ResponseEntity.ok(isAdmin);
+    }
+
+    @DeleteMapping("/{teamId}")
+    @Operation(summary = "팀 삭제", description = "팀을 완전히 삭제합니다. admin 권한 필요. 팀 이름을 정확히 입력해야 합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "팀 삭제 성공"),
+            @ApiResponse(responseCode = "400", description = "팀 이름 불일치"),
+            @ApiResponse(responseCode = "403", description = "권한 없음"),
+            @ApiResponse(responseCode = "404", description = "팀을 찾을 수 없음")
+    })
+    public ResponseEntity<String> deleteTeam(
+            @Parameter(description = "삭제할 팀 ID", required = true)
+            @PathVariable Long teamId,
+            @RequestBody @Valid TeamDto.DeleteRequest request,
+            @Parameter(description = "요청자 ID (admin 권한 필요)", required = true)
+            @RequestParam Long userId) {
+
+        teamService.deleteTeam(teamId, request.getTeamNameConfirmation(), userId);
+
+        return ResponseEntity.ok("팀이 성공적으로 삭제되었습니다.");
     }
 }
