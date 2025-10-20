@@ -48,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(String userAgent, LoginRequest loginRequest) {
+    public String login(LoginRequest loginRequest) {
         validationService.checkNull(loginRequest);
 
         String userEmail = loginRequest.getUserEmail();

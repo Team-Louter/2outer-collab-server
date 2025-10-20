@@ -5,5 +5,5 @@ import com.louter.collab.auth.dto.request.SignupRequest;
 
 public interface AuthService {
     void signup(SignupRequest signupRequest);
-    String login(String userAgent, LoginRequest loginRequest);
+    String login(LoginRequest loginRequest);
 }
