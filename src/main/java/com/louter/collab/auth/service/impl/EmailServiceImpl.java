@@ -28,7 +28,7 @@ public class EmailServiceImpl implements EmailService {
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("lightangel5464@dgsw.hs.kr");
+            message.setFrom("ldy2009aa@gmail.com");
             message.setTo(request.getUserEmail());
             message.setSubject("[Collab 이메일 인증 코드]");
             message.setText("인증코드: " + code);
