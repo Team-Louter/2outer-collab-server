@@ -37,7 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs").permitAll()
                         // 임시: 팀/권한 API 테스트용 (JWT 구현 후 제거)
                         .requestMatchers("/teams/**").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()  // 임시: 모든 요청 허용
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)

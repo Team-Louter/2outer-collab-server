@@ -25,4 +25,7 @@ public interface UserTeamRepository extends JpaRepository<UserTeam, UserTeamId> 
     
     // 특정 팀에서 특정 권한을 가진 멤버들
     List<UserTeam> findByTeam_TeamIdAndRole_RoleId(Long teamId, Long roleId);
+    
+    // 특정 팀의 모든 팀원 관계 삭제
+    void deleteByTeam_TeamId(Long teamId);
 }

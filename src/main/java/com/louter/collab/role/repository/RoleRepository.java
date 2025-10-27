@@ -16,4 +16,7 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
     
     // 특정 팀에 특정 권한 이름이 존재하는지 확인
     boolean existsByTeam_TeamIdAndRoleName(Long teamId, String roleName);
+    
+    // 특정 팀의 모든 권한 삭제
+    void deleteByTeam_TeamId(Long teamId);
 }

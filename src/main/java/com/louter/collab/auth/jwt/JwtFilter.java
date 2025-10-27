@@ -31,7 +31,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 path.startsWith("/email/") ||
                 path.startsWith("/swagger-ui/") ||
                 path.startsWith("/v3/api-docs/") ||
-                path.startsWith("/api-docs")) {
+                path.startsWith("/api-docs") ||
+                path.startsWith("/teams/")) {
             filterChain.doFilter(request, response);
             return;
         }

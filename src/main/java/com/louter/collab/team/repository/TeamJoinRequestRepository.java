@@ -18,4 +18,7 @@ public interface TeamJoinRequestRepository extends JpaRepository<TeamJoinRequest
     // 특정 유저가 특정 팀에 신청한 적이 있는지 확인
     boolean existsByUser_UserIdAndTeam_TeamIdAndStatus(
             Long userId, Long teamId, TeamJoinRequest.RequestStatus status);
+    
+    // 특정 팀의 모든 가입 신청 삭제
+    void deleteByTeam_TeamId(Long teamId);
 }

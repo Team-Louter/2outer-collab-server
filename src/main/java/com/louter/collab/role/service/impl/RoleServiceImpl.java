@@ -245,6 +245,21 @@ public class RoleServiceImpl implements RoleService {
         return team.getCreator().getUserId().equals(userId);
     }
 
+    @Override
+    @Transactional
+    public void deleteTeamRoles(Long teamId) {
+        // 팀의 모든 권한 조회
+        List<Role> roles = roleRepository.findByTeam_TeamId(teamId);
+        
+        // 각 권한의 퍼미션 먼저 삭제 (외래 키 제약 조건 때문)
+        for (Role role : roles) {
+            rolePermissionRepository.deleteByRole_RoleId(role.getRoleId());
+        }
+        
+        // 권한 삭제
+        roleRepository.deleteByTeam_TeamId(teamId);
+    }
+
     // 헬퍼 메서드: 권한에 퍼미션 추가
     private void addPermissionToRole(Role role, String permission) {
         RolePermissionId rolePermissionId = new RolePermissionId(role.getRoleId(), permission);

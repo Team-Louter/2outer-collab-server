@@ -88,7 +88,17 @@ public class TeamServiceImpl implements TeamService {
             throw new IllegalArgumentException("팀 이름이 일치하지 않습니다.");
         }
 
-        // 팀 삭제 (연관된 UserTeam, Role, RolePermission은 cascade로 삭제)
+        // 연관 데이터 삭제
+        // 1. 팀-유저 관계 삭제
+        userTeamRepository.deleteByTeam_TeamId(teamId);
+        
+        // 2. 팀 가입 신청 삭제
+        teamJoinRequestRepository.deleteByTeam_TeamId(teamId);
+        
+        // 3. 팀 권한 삭제 (RolePermission은 cascade로 삭제됨)
+        roleService.deleteTeamRoles(teamId);
+        
+        // 4. 팀 삭제
         teamRepository.delete(team);
     }
 

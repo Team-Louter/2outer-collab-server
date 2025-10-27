@@ -56,4 +56,9 @@ public interface RoleService {
      * 특정 유저가 팀 생성자인지 확인
      */
     boolean isTeamCreator(Long userId, Long teamId);
+    
+    /**
+     * 팀의 모든 권한 삭제
+     */
+    void deleteTeamRoles(Long teamId);
 }

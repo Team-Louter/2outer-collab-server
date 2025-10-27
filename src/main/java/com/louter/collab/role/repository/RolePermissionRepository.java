@@ -13,4 +13,7 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
     
     // 특정 권한에 특정 퍼미션이 있는지 확인
     boolean existsByRole_RoleIdAndId_Permission(Long roleId, String permission);
+    
+    // 특정 권한의 모든 퍼미션 삭제
+    void deleteByRole_RoleId(Long roleId);
 }
