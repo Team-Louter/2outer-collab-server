@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -20,7 +21,7 @@ public class ScheduleRequest {
     private String scheduleContent;
 
     @NotNull
-    private LocalDate scheduleDate;
+    private LocalDateTime scheduleDate;
 
     @NotNull
     private Color color;
