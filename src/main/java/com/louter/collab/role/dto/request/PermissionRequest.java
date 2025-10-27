@@ -1,5 +1,7 @@
 package com.louter.collab.role.dto.request;
 
+import com.louter.collab.role.domain.Permission;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,5 +13,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PermissionRequest {
 
-    private String permission;
+    @NotNull
+    private Permission permission;
 }

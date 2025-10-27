@@ -1,6 +1,5 @@
 package com.louter.collab.role.controller;
 
-import com.louter.collab.role.domain.Role;
 import com.louter.collab.role.dto.request.PermissionRequest;
 import com.louter.collab.role.dto.request.RoleCreateRequest;
 import com.louter.collab.role.dto.response.RoleResponse;
@@ -42,7 +41,7 @@ public class RoleController {
 
     // 권한 삭제
     @DeleteMapping("/{roleId}")
-    public ResponseEntity<Object> deleteRole(
+    public ResponseEntity<?> deleteRole(
             @PathVariable Long teamId,
             @PathVariable Long roleId,
             @RequestParam Long userId) {  // 임시: JWT 구현 전까지 파라미터로 받음
@@ -52,7 +51,7 @@ public class RoleController {
 
     // 권한에 퍼미션 추가
     @PostMapping("/{roleId}/permissions")
-    public ResponseEntity<Object> addPermission(
+    public ResponseEntity<?> addPermission(
             @PathVariable Long teamId,
             @PathVariable Long roleId,
             @RequestParam Long userId,  // 임시: JWT 구현 전까지 파라미터로 받음
@@ -63,7 +62,7 @@ public class RoleController {
 
     // 권한에서 퍼미션 제거
     @DeleteMapping("/{roleId}/permissions")
-    public ResponseEntity<Object> removePermission(
+    public ResponseEntity<?> removePermission(
             @PathVariable Long teamId,
             @PathVariable Long roleId,
             @RequestParam Long userId,  // 임시: JWT 구현 전까지 파라미터로 받음

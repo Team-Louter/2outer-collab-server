@@ -1,6 +1,7 @@
 package com.louter.collab.role.service.impl;
 
 import com.louter.collab.common.exception.IllegalArgumentException;
+import com.louter.collab.role.domain.Permission;
 import com.louter.collab.role.domain.Role;
 import com.louter.collab.role.domain.RolePermission;
 import com.louter.collab.role.domain.RolePermissionId;
@@ -50,8 +51,8 @@ public class RoleServiceImpl implements RoleService {
                 .build();
         memberRole = roleRepository.save(memberRole);
 
-        // 기본 퍼미션 추가 (READ)
-        addPermissionToRole(memberRole, "READ");
+        // 기본 퍼미션 추가 (팀 채팅만)
+        addPermissionToRole(memberRole, Permission.TEAM_CHAT);
 
         return memberRole;
     }
@@ -77,22 +78,20 @@ public class RoleServiceImpl implements RoleService {
                 .build();
         adminRole = roleRepository.save(adminRole);
 
-        // 관리자 퍼미션 추가
-        addPermissionToRole(adminRole, "READ");
-        addPermissionToRole(adminRole, "WRITE");
-        addPermissionToRole(adminRole, "DELETE");
-        addPermissionToRole(adminRole, "KICK_MEMBER");
-        addPermissionToRole(adminRole, "APPROVE_MEMBER");
-        addPermissionToRole(adminRole, "MANAGE_ROLES");
+        // 관리자 퍼미션 추가 (모든 권한)
+        addPermissionToRole(adminRole, Permission.TEAM_SETTINGS);
+        addPermissionToRole(adminRole, Permission.ANNOUNCEMENT);
+        addPermissionToRole(adminRole, Permission.MEETING_SCHEDULE);
+        addPermissionToRole(adminRole, Permission.TEAM_CHAT);
 
         return adminRole;
     }
 
     @Override
     @Transactional
-    public Role createCustomRole(Long userId, Long teamId, String roleName, Set<String> permissions) {
-        // MANAGE_ROLES 권한 확인
-        if (!hasPermission(userId, teamId, "MANAGE_ROLES")) {
+    public Role createCustomRole(Long userId, Long teamId, String roleName, Set<Permission> permissions) {
+        // TEAM_SETTINGS 권한 확인 (권한 관리)
+        if (!hasPermission(userId, teamId, Permission.TEAM_SETTINGS)) {
             throw new IllegalArgumentException("권한을 관리할 권한이 없습니다.");
         }
 
@@ -115,7 +114,7 @@ public class RoleServiceImpl implements RoleService {
 
         // 퍼미션 추가
         if (permissions != null && !permissions.isEmpty()) {
-            for (String permission : permissions) {
+            for (Permission permission : permissions) {
                 addPermissionToRole(customRole, permission);
             }
         }
@@ -126,8 +125,8 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public void deleteRole(Long userId, Long teamId, Long roleId) {
-        // MANAGE_ROLES 권한 확인
-        if (!hasPermission(userId, teamId, "MANAGE_ROLES")) {
+        // TEAM_SETTINGS 권한 확인
+        if (!hasPermission(userId, teamId, Permission.TEAM_SETTINGS)) {
             throw new IllegalArgumentException("권한을 관리할 권한이 없습니다.");
         }
 
@@ -157,9 +156,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
-    public void addPermission(Long userId, Long teamId, Long roleId, String permission) {
-        // MANAGE_ROLES 권한 확인
-        if (!hasPermission(userId, teamId, "MANAGE_ROLES")) {
+    public void addPermission(Long userId, Long teamId, Long roleId, Permission permission) {
+        // TEAM_SETTINGS 권한 확인
+        if (!hasPermission(userId, teamId, Permission.TEAM_SETTINGS)) {
             throw new IllegalArgumentException("권한을 관리할 권한이 없습니다.");
         }
 
@@ -183,9 +182,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
-    public void removePermission(Long userId, Long teamId, Long roleId, String permission) {
-        // MANAGE_ROLES 권한 확인
-        if (!hasPermission(userId, teamId, "MANAGE_ROLES")) {
+    public void removePermission(Long userId, Long teamId, Long roleId, Permission permission) {
+        // TEAM_SETTINGS 권한 확인
+        if (!hasPermission(userId, teamId, Permission.TEAM_SETTINGS)) {
             throw new IllegalArgumentException("권한을 관리할 권한이 없습니다.");
         }
 
@@ -219,7 +218,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public boolean hasPermission(Long userId, Long teamId, String permission) {
+    public boolean hasPermission(Long userId, Long teamId, Permission permission) {
         // 생성자는 모든 권한 보유
         if (isTeamCreator(userId, teamId)) {
             return true;
@@ -261,7 +260,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     // 헬퍼 메서드: 권한에 퍼미션 추가
-    private void addPermissionToRole(Role role, String permission) {
+    private void addPermissionToRole(Role role, Permission permission) {
         RolePermissionId rolePermissionId = new RolePermissionId(role.getRoleId(), permission);
         RolePermission rolePermission = RolePermission.builder()
                 .id(rolePermissionId)

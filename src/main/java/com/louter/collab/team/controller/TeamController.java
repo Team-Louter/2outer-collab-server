@@ -50,11 +50,11 @@ public class TeamController {
 
     // 팀 삭제
     @DeleteMapping("/{teamId}")
-    public ResponseEntity<Object> deleteTeam(
+    public ResponseEntity<?> deleteTeam(
             @PathVariable Long teamId,
             @RequestParam Long userId,  // 임시: JWT 구현 전까지 파라미터로 받음
-            @RequestBody TeamDeleteRequest request) {
-        teamService.deleteTeam(userId, teamId, request.getConfirmTeamName());
+            @RequestParam String confirmTeamName) {
+        teamService.deleteTeam(userId, teamId, confirmTeamName);
         return ResponseEntity.ok(Map.of("success", true, "message", "팀이 삭제되었습니다."));
     }
 
@@ -69,7 +69,7 @@ public class TeamController {
 
     // 팀 가입 신청 승인/거절
     @PostMapping("/{teamId}/join-request/process")
-    public ResponseEntity<Object> processJoinRequest(
+    public ResponseEntity<?> processJoinRequest(
             @PathVariable Long teamId,
             @RequestParam Long adminUserId,  // 임시: JWT 구현 전까지 파라미터로 받음
             @RequestBody JoinRequestActionDto request) {
@@ -90,7 +90,7 @@ public class TeamController {
 
     // 팀 탈퇴
     @DeleteMapping("/{teamId}/leave")
-    public ResponseEntity<Object> leaveTeam(
+    public ResponseEntity<?> leaveTeam(
             @PathVariable Long teamId,
             @RequestParam Long userId) {  // 임시: JWT 구현 전까지 파라미터로 받음
         teamService.leaveTeam(userId, teamId);
@@ -99,7 +99,7 @@ public class TeamController {
 
     // 팀원 추방
     @DeleteMapping("/{teamId}/kick")
-    public ResponseEntity<Object> kickMember(
+    public ResponseEntity<?> kickMember(
             @PathVariable Long teamId,
             @RequestParam Long adminUserId,  // 임시: JWT 구현 전까지 파라미터로 받음
             @RequestBody TeamKickRequest request) {
@@ -129,7 +129,7 @@ public class TeamController {
 
     // 팀 멤버 권한 변경
     @PutMapping("/{teamId}/members/role")
-    public ResponseEntity<Object> changeMemberRole(
+    public ResponseEntity<?> changeMemberRole(
             @PathVariable Long teamId,
             @RequestParam Long adminUserId,  // 임시: JWT 구현 전까지 파라미터로 받음
             @RequestBody ChangeMemberRoleRequest request) {

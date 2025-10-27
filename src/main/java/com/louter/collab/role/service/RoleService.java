@@ -1,5 +1,6 @@
 package com.louter.collab.role.service;
 
+import com.louter.collab.role.domain.Permission;
 import com.louter.collab.role.domain.Role;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface RoleService {
     /**
      * 커스텀 권한 생성
      */
-    Role createCustomRole(Long userId, Long teamId, String roleName, Set<String> permissions);
+    Role createCustomRole(Long userId, Long teamId, String roleName, Set<Permission> permissions);
     
     /**
      * 권한 삭제
@@ -30,12 +31,12 @@ public interface RoleService {
     /**
      * 권한에 퍼미션 추가
      */
-    void addPermission(Long userId, Long teamId, Long roleId, String permission);
+    void addPermission(Long userId, Long teamId, Long roleId, Permission permission);
     
     /**
      * 권한에서 퍼미션 제거
      */
-    void removePermission(Long userId, Long teamId, Long roleId, String permission);
+    void removePermission(Long userId, Long teamId, Long roleId, Permission permission);
     
     /**
      * 팀의 모든 권한 조회
@@ -50,7 +51,7 @@ public interface RoleService {
     /**
      * 특정 유저가 특정 팀에서 특정 퍼미션을 가지고 있는지 확인
      */
-    boolean hasPermission(Long userId, Long teamId, String permission);
+    boolean hasPermission(Long userId, Long teamId, Permission permission);
     
     /**
      * 특정 유저가 팀 생성자인지 확인

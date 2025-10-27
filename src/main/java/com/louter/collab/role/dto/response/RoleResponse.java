@@ -1,5 +1,6 @@
 package com.louter.collab.role.dto.response;
 
+import com.louter.collab.role.domain.Permission;
 import com.louter.collab.role.domain.Role;
 import com.louter.collab.role.domain.RolePermission;
 import lombok.AllArgsConstructor;
@@ -20,7 +21,7 @@ public class RoleResponse {
     private Long roleId;
     private Long teamId;
     private String roleName;
-    private Set<String> permissions;
+    private Set<Permission> permissions;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

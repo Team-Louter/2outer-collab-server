@@ -21,11 +21,11 @@ public class RolePermission {
     private Role role;
 
     // 편의 접근자
-    public String getPermission() {
+    public Permission getPermission() {
         return id != null ? id.getPermission() : null;
     }
 
-    public void setPermission(String permission) {
+    public void setPermission(Permission permission) {
         if (this.id == null) this.id = new RolePermissionId();
         this.id.setPermission(permission);
     }

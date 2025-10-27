@@ -4,6 +4,7 @@ import com.louter.collab.auth.domain.User;
 import com.louter.collab.auth.repository.UserRepository;
 import com.louter.collab.common.exception.IllegalArgumentException;
 import com.louter.collab.common.exception.UserNotFoundException;
+import com.louter.collab.role.domain.Permission;
 import com.louter.collab.role.domain.Role;
 import com.louter.collab.role.service.RoleService;
 import com.louter.collab.team.domain.Team;
@@ -141,8 +142,8 @@ public class TeamServiceImpl implements TeamService {
         TeamJoinRequest joinRequest = teamJoinRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("가입 신청을 찾을 수 없습니다."));
 
-        // 관리자 권한 확인 (APPROVE_MEMBER 퍼미션 필요)
-        if (!roleService.hasPermission(adminUserId, joinRequest.getTeam().getTeamId(), "APPROVE_MEMBER") &&
+        // 관리자 권한 확인 (TEAM_SETTINGS 퍼미션 필요)
+        if (!roleService.hasPermission(adminUserId, joinRequest.getTeam().getTeamId(), Permission.TEAM_SETTINGS) &&
             !roleService.isTeamCreator(adminUserId, joinRequest.getTeam().getTeamId())) {
             throw new IllegalArgumentException("가입 신청을 처리할 권한이 없습니다.");
         }
@@ -223,8 +224,8 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @Transactional
     public void kickMember(Long adminUserId, Long teamId, Long targetUserId) {
-        // 관리자 권한 확인 (KICK_MEMBER 퍼미션 필요)
-        if (!roleService.hasPermission(adminUserId, teamId, "KICK_MEMBER")) {
+        // 관리자 권한 확인 (TEAM_SETTINGS 퍼미션 필요)
+        if (!roleService.hasPermission(adminUserId, teamId, Permission.TEAM_SETTINGS)) {
             throw new IllegalArgumentException("팀원을 추방할 권한이 없습니다.");
         }
 
@@ -282,8 +283,8 @@ public class TeamServiceImpl implements TeamService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
 
-        // 관리자 권한 확인 (MANAGE_ROLES 퍼미션 또는 생성자)
-        if (!roleService.hasPermission(adminUserId, teamId, "MANAGE_ROLES") &&
+        // 관리자 권한 확인 (TEAM_SETTINGS 퍼미션 또는 생성자)
+        if (!roleService.hasPermission(adminUserId, teamId, Permission.TEAM_SETTINGS) &&
             !roleService.isTeamCreator(adminUserId, teamId)) {
             throw new IllegalArgumentException("멤버 권한을 변경할 권한이 없습니다.");
         }
