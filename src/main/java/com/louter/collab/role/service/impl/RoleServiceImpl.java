@@ -43,7 +43,7 @@ public class RoleServiceImpl implements RoleService {
                     .orElseThrow(() -> new IllegalArgumentException("멤버 권한을 찾을 수 없습니다."));
         }
 
-        // 멤버 권한 생성
+        // 멤버 권한 생성 (권한 없음 - 뷰어만 가능)
         Role memberRole = Role.builder()
                 .team(team)
                 .roleName("멤버")
@@ -51,8 +51,7 @@ public class RoleServiceImpl implements RoleService {
                 .build();
         memberRole = roleRepository.save(memberRole);
 
-        // 기본 퍼미션 추가 (팀 채팅만)
-        addPermissionToRole(memberRole, Permission.TEAM_CHAT);
+        // 멤버는 권한 없이 뷰어로만 동작 (커스텀 역할로 권한 추가 가능)
 
         return memberRole;
     }
