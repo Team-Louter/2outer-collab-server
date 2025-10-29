@@ -15,13 +15,14 @@ public class JwtAuthenticationFilter extends JwtUtil{
         super(secretKey, expiration);
     }
 
-    public String userEmailFromToken(String token) {
+    public Long userIdFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        return claims.getSubject();
+
+        return Long.parseLong(claims.getSubject());
     }
 
     public void validateToken(String token) {

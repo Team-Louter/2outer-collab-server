@@ -43,8 +43,8 @@ public class JwtFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             try {
                 jwtAuth.validateToken(token);
-                String userEmail = jwtAuth.userEmailFromToken(token);
-                Authentication authentication = new UsernamePasswordAuthenticationToken(userEmail, null, Collections.emptyList());
+                Long userId = jwtAuth.userIdFromToken(token);
+                Authentication authentication = new UsernamePasswordAuthenticationToken(userId, null, Collections.emptyList());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
