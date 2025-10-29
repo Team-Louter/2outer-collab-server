@@ -51,10 +51,10 @@ public class AuthServiceImpl implements AuthService {
     public String login(LoginRequest loginRequest) {
         validationService.checkNull(loginRequest);
 
-        String userEmail = loginRequest.getUserEmail();
+        Long userId = loginRequest.getUserId();
         String userPassword = loginRequest.getUserPassword();
 
-        Optional<User> tempUser = userRepository.findByUserEmail(userEmail);
+        Optional<User> tempUser = userRepository.findByUserId(userId);
         if (tempUser.isEmpty()) {
             throw new UserNotFoundException("유저 조회 실패");
         }
@@ -64,6 +64,6 @@ public class AuthServiceImpl implements AuthService {
             throw new UserNotFoundException("유저 조회 실패");
         }
 
-        return jwtTokenProvider.generateToken(String.valueOf(user.getUserId()));
+        return jwtTokenProvider.generateToken(user.getUserId());
     }
 }

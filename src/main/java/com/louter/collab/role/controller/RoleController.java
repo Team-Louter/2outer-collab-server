@@ -25,8 +25,8 @@ public class RoleController {
 
     // 현재 로그인한 사용자 ID 가져오기
     private Long getCurrentUserId() {
-        String userEmail = jwtTokenProvider.getCurrentUserEmail();
-        return userRepository.findByUserEmail(userEmail)
+        Long userId = jwtTokenProvider.getCurrentUserId();
+        return userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."))
                 .getUserId();
     }
