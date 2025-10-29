@@ -1,5 +1,8 @@
 package com.louter.collab.role.controller;
 
+import com.louter.collab.auth.jwt.JwtTokenProvider;
+import com.louter.collab.auth.repository.UserRepository;
+import com.louter.collab.common.exception.UserNotFoundException;
 import com.louter.collab.role.dto.request.PermissionRequest;
 import com.louter.collab.role.dto.request.RoleCreateRequest;
 import com.louter.collab.role.dto.response.RoleResponse;
@@ -17,6 +20,16 @@ import java.util.Map;
 public class RoleController {
 
     private final RoleService roleService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
+
+    // 현재 로그인한 사용자 ID 가져오기
+    private Long getCurrentUserId() {
+        String userEmail = jwtTokenProvider.getCurrentUserEmail();
+        return userRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."))
+                .getUserId();
+    }
 
     // 팀의 모든 권한 조회
     @GetMapping
@@ -32,8 +45,8 @@ public class RoleController {
     @PostMapping
     public ResponseEntity<RoleResponse> createCustomRole(
             @PathVariable Long teamId,
-            @RequestParam Long userId,  // 임시: JWT 구현 전까지 파라미터로 받음
             @RequestBody RoleCreateRequest request) {
+        Long userId = getCurrentUserId();
         var role = roleService.createCustomRole(userId, teamId, 
                 request.getRoleName(), request.getPermissions());
         return ResponseEntity.ok(RoleResponse.from(role));
@@ -43,8 +56,8 @@ public class RoleController {
     @DeleteMapping("/{roleId}")
     public ResponseEntity<?> deleteRole(
             @PathVariable Long teamId,
-            @PathVariable Long roleId,
-            @RequestParam Long userId) {  // 임시: JWT 구현 전까지 파라미터로 받음
+            @PathVariable Long roleId) {
+        Long userId = getCurrentUserId();
         roleService.deleteRole(userId, teamId, roleId);
         return ResponseEntity.ok(Map.of("success", true, "message", "권한이 삭제되었습니다."));
     }
@@ -54,8 +67,8 @@ public class RoleController {
     public ResponseEntity<?> addPermission(
             @PathVariable Long teamId,
             @PathVariable Long roleId,
-            @RequestParam Long userId,  // 임시: JWT 구현 전까지 파라미터로 받음
             @RequestBody PermissionRequest request) {
+        Long userId = getCurrentUserId();
         roleService.addPermission(userId, teamId, roleId, request.getPermission());
         return ResponseEntity.ok(Map.of("success", true, "message", "퍼미션이 추가되었습니다."));
     }
@@ -65,8 +78,8 @@ public class RoleController {
     public ResponseEntity<?> removePermission(
             @PathVariable Long teamId,
             @PathVariable Long roleId,
-            @RequestParam Long userId,  // 임시: JWT 구현 전까지 파라미터로 받음
             @RequestBody PermissionRequest request) {
+        Long userId = getCurrentUserId();
         roleService.removePermission(userId, teamId, roleId, request.getPermission());
         return ResponseEntity.ok(Map.of("success", true, "message", "퍼미션이 제거되었습니다."));
     }

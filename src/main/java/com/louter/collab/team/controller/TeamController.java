@@ -1,5 +1,8 @@
 package com.louter.collab.team.controller;
 
+import com.louter.collab.auth.jwt.JwtTokenProvider;
+import com.louter.collab.auth.repository.UserRepository;
+import com.louter.collab.common.exception.UserNotFoundException;
 import com.louter.collab.team.domain.Team;
 import com.louter.collab.team.dto.request.*;
 import com.louter.collab.team.dto.response.TeamJoinRequestResponse;
@@ -19,12 +22,22 @@ import java.util.Map;
 public class TeamController {
 
     private final TeamService teamService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
+
+    // 현재 로그인한 사용자 ID 가져오기
+    private Long getCurrentUserId() {
+        String userEmail = jwtTokenProvider.getCurrentUserEmail();
+        return userRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."))
+                .getUserId();
+    }
 
     // 팀 생성
     @PostMapping
     public ResponseEntity<TeamResponse> createTeam(
-            @RequestParam Long userId,  // 임시: JWT 구현 전까지 파라미터로 받음
             @RequestBody TeamCreateRequest request) {
+        Long userId = getCurrentUserId();
         Team team = teamService.createTeam(userId, request.getTeamName(), 
                 request.getProfilePicture(), request.getBannerPicture(), request.getIntro());
         return ResponseEntity.ok(TeamResponse.from(team));
@@ -41,8 +54,8 @@ public class TeamController {
     @PutMapping("/{teamId}")
     public ResponseEntity<TeamResponse> updateTeam(
             @PathVariable Long teamId,
-            @RequestParam Long userId,  // 임시: JWT 구현 전까지 파라미터로 받음
             @RequestBody TeamUpdateRequest request) {
+        Long userId = getCurrentUserId();
         Team team = teamService.updateTeam(userId, teamId, request.getTeamName(), 
                 request.getProfilePicture(), request.getBannerPicture(), request.getIntro());
         return ResponseEntity.ok(TeamResponse.from(team));
@@ -52,8 +65,8 @@ public class TeamController {
     @DeleteMapping("/{teamId}")
     public ResponseEntity<?> deleteTeam(
             @PathVariable Long teamId,
-            @RequestParam Long userId,  // 임시: JWT 구현 전까지 파라미터로 받음
             @RequestParam String confirmTeamName) {
+        Long userId = getCurrentUserId();
         teamService.deleteTeam(userId, teamId, confirmTeamName);
         return ResponseEntity.ok(Map.of("success", true, "message", "팀이 삭제되었습니다."));
     }
@@ -61,8 +74,8 @@ public class TeamController {
     // 팀 가입 신청
     @PostMapping("/{teamId}/join-request")
     public ResponseEntity<TeamJoinRequestResponse> requestJoinTeam(
-            @PathVariable Long teamId,
-            @RequestParam Long userId) {  // 임시: JWT 구현 전까지 파라미터로 받음
+            @PathVariable Long teamId) {
+        Long userId = getCurrentUserId();
         var joinRequest = teamService.requestJoinTeam(userId, teamId);
         return ResponseEntity.ok(TeamJoinRequestResponse.from(joinRequest));
     }
@@ -71,8 +84,8 @@ public class TeamController {
     @PostMapping("/{teamId}/join-request/process")
     public ResponseEntity<?> processJoinRequest(
             @PathVariable Long teamId,
-            @RequestParam Long adminUserId,  // 임시: JWT 구현 전까지 파라미터로 받음
             @RequestBody JoinRequestActionDto request) {
+        Long adminUserId = getCurrentUserId();
         teamService.processJoinRequest(adminUserId, request.getRequestId(), request.getApprove());
         String message = request.getApprove() ? "가입 신청이 승인되었습니다." : "가입 신청이 거절되었습니다.";
         return ResponseEntity.ok(Map.of("success", true, "message", message));
@@ -90,9 +103,8 @@ public class TeamController {
 
     // 팀 탈퇴
     @DeleteMapping("/{teamId}/leave")
-    public ResponseEntity<?> leaveTeam(
-            @PathVariable Long teamId,
-            @RequestParam Long userId) {  // 임시: JWT 구현 전까지 파라미터로 받음
+    public ResponseEntity<?> leaveTeam(@PathVariable Long teamId) {
+        Long userId = getCurrentUserId();
         teamService.leaveTeam(userId, teamId);
         return ResponseEntity.ok(Map.of("success", true, "message", "팀에서 탈퇴했습니다."));
     }
@@ -101,15 +113,16 @@ public class TeamController {
     @DeleteMapping("/{teamId}/kick")
     public ResponseEntity<?> kickMember(
             @PathVariable Long teamId,
-            @RequestParam Long adminUserId,  // 임시: JWT 구현 전까지 파라미터로 받음
             @RequestBody TeamKickRequest request) {
+        Long adminUserId = getCurrentUserId();
         teamService.kickMember(adminUserId, teamId, request.getTargetUserId());
         return ResponseEntity.ok(Map.of("success", true, "message", "팀원이 추방되었습니다."));
     }
 
     // 내가 속한 팀 목록
     @GetMapping("/my-teams")
-    public ResponseEntity<List<TeamResponse>> getMyTeams(@RequestParam Long userId) {  // 임시
+    public ResponseEntity<List<TeamResponse>> getMyTeams() {
+        Long userId = getCurrentUserId();
         var teams = teamService.getUserTeams(userId);
         var responses = teams.stream()
                 .map(TeamResponse::from)
@@ -131,8 +144,8 @@ public class TeamController {
     @PutMapping("/{teamId}/members/role")
     public ResponseEntity<?> changeMemberRole(
             @PathVariable Long teamId,
-            @RequestParam Long adminUserId,  // 임시: JWT 구현 전까지 파라미터로 받음
             @RequestBody ChangeMemberRoleRequest request) {
+        Long adminUserId = getCurrentUserId();
         teamService.changeMemberRole(adminUserId, teamId, request.getTargetUserId(), request.getNewRoleId());
         return ResponseEntity.ok(Map.of("success", true, "message", "멤버의 권한이 변경되었습니다."));
     }
