@@ -38,7 +38,7 @@ public class ValidationServiceImpl implements ValidationService {
 
     @Override
     public void checkUserName(String userName) {
-        if (userName.length() < 4 || userName.length() > 20) {
+        if (userName.length() < 2 || userName.length() > 20) {
             throw new IllegalArgumentException("길이가 잘못됨");
         }
         if (!userName.matches("^[a-zA-Z0-9]+$")) {
@@ -47,14 +47,14 @@ public class ValidationServiceImpl implements ValidationService {
         if (userName.matches(".*(.)\\1{2,}.*")) {
             throw new IllegalArgumentException("3글자 이상 연속");
         }
-        if (!userName.matches("^(?=.*[A-Za-z])(?=.*\\d).+$")) {
+        if (!userName.matches("^(?=.*[A-Za-z]).+$")) {
             throw new IllegalArgumentException("영어, 숫자 포함 안 됨");
         }
     }
 
     @Override
     public void checkPassword(String password, String confirmPassword) {
-        if (password.length() < 6 || password.length() > 20) {
+        if (password.length() < 8 || password.length() > 20) {
             throw new IllegalArgumentException("길이가 잘못됨");
         }
         if (!password.matches("^[A-Za-z0-9@$!%*?&]+$")) {

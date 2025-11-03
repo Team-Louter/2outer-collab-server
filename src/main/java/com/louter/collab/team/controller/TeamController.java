@@ -1,8 +1,6 @@
 package com.louter.collab.team.controller;
 
 import com.louter.collab.auth.jwt.JwtTokenProvider;
-import com.louter.collab.auth.repository.UserRepository;
-import com.louter.collab.common.exception.UserNotFoundException;
 import com.louter.collab.team.domain.Team;
 import com.louter.collab.team.dto.request.*;
 import com.louter.collab.team.dto.response.TeamJoinRequestResponse;
@@ -23,14 +21,10 @@ public class TeamController {
 
     private final TeamService teamService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository;
 
-    // 현재 로그인한 사용자 ID 가져오기
+    // 현재 로그인한 사용자 ID 가져오기 (토큰 기반, 불필요한 DB 조회 제거)
     private Long getCurrentUserId() {
-        String userEmail = jwtTokenProvider.getCurrentUserEmail();
-        return userRepository.findByUserEmail(userEmail)
-                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."))
-                .getUserId();
+        return jwtTokenProvider.getCurrentUserId();
     }
 
     // 팀 생성

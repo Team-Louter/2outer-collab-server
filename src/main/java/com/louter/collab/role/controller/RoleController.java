@@ -1,8 +1,6 @@
 package com.louter.collab.role.controller;
 
 import com.louter.collab.auth.jwt.JwtTokenProvider;
-import com.louter.collab.auth.repository.UserRepository;
-import com.louter.collab.common.exception.UserNotFoundException;
 import com.louter.collab.role.dto.request.PermissionRequest;
 import com.louter.collab.role.dto.request.RoleCreateRequest;
 import com.louter.collab.role.dto.response.RoleResponse;
@@ -21,14 +19,10 @@ public class RoleController {
 
     private final RoleService roleService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository;
 
     // 현재 로그인한 사용자 ID 가져오기
     private Long getCurrentUserId() {
-        String userEmail = jwtTokenProvider.getCurrentUserEmail();
-        return userRepository.findByUserEmail(userEmail)
-                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."))
-                .getUserId();
+        return jwtTokenProvider.getCurrentUserId();
     }
 
     // 팀의 모든 권한 조회

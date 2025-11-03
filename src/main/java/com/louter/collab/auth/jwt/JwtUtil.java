@@ -14,12 +14,10 @@ public class JwtUtil {
         this.expiration = expiration;
     }
 
-    public String getCurrentUserEmail() {
+    public Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication);
-        if (authentication != null) {
-            System.out.println(authentication.getName());
-            return authentication.getName();
+        if (authentication != null && authentication.getName() != null) {
+            return Long.parseLong(authentication.getName());
         }
         return null;
     }

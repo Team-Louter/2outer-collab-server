@@ -64,6 +64,6 @@ public class AuthServiceImpl implements AuthService {
             throw new UserNotFoundException("유저 조회 실패");
         }
 
-        return jwtTokenProvider.generateToken(String.valueOf(user.getUserId()));
+        return jwtTokenProvider.generateToken(user.getUserId());
     }
 }
