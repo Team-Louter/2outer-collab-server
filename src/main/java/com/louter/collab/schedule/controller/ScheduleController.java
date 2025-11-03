@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("team/{teamId}/schedule")
+@RequestMapping("/team/{teamId}/schedule")
 public class ScheduleController {
 
     private final ScheduleRepository scheduleRepository;
@@ -26,7 +26,7 @@ public class ScheduleController {
     // 일정 생성
     @PostMapping
     public ResponseEntity<Object> createSchedule(
-            @PathVariable Long teamId,
+            @PathVariable("teamId") Long teamId,
             @RequestBody ScheduleRequest scheduleRequest) {
         try {
             Team team = teamRepository.findByTeamId(teamId)
@@ -53,7 +53,7 @@ public class ScheduleController {
 
     // 모든 일정 조회
     @GetMapping
-    public ResponseEntity<Object> getSchedules(@PathVariable Long teamId) {
+    public ResponseEntity<Object> getSchedules(@PathVariable("teamId") Long teamId) {
         try {
             Team team = teamRepository.findByTeamId(teamId)
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -72,8 +72,8 @@ public class ScheduleController {
 
     // 특정 일정 조회
     @GetMapping("/{scheduleId}")
-    public ResponseEntity<Object> getSchedule(@PathVariable Long teamId,
-                                              @PathVariable Long scheduleId) {
+    public ResponseEntity<Object> getSchedule(@PathVariable("teamId") Long teamId,
+                                              @PathVariable("scheduleId") Long scheduleId) {
         try {
             Schedule schedule = scheduleRepository.findByScheduleIdAndTeamTeamId(scheduleId, teamId)
                     .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found"));
@@ -90,8 +90,8 @@ public class ScheduleController {
 
     // 일정 수정
     @PutMapping("/{scheduleId}")
-    public ResponseEntity<Object> updateSchedule(@PathVariable Long teamId,
-                                                 @PathVariable Long scheduleId,
+    public ResponseEntity<Object> updateSchedule(@PathVariable("teamId") Long teamId,
+                                                 @PathVariable("scheduleId") Long scheduleId,
                                                  @RequestBody ScheduleRequest scheduleRequest) {
         try{
             Schedule schedule = scheduleRepository.findByScheduleIdAndTeamTeamId(scheduleId, teamId)
@@ -116,8 +116,8 @@ public class ScheduleController {
 
     // 일정 삭제
     @DeleteMapping("/{scheduleId}")
-    public ResponseEntity<Object> deleteSchedule(@PathVariable Long teamId,
-                                                 @PathVariable Long scheduleId) {
+    public ResponseEntity<Object> deleteSchedule(@PathVariable("teamId") Long teamId,
+                                                 @PathVariable("scheduleId") Long scheduleId) {
         try{
             Schedule schedule = scheduleRepository.findByScheduleIdAndTeamTeamId(scheduleId, teamId)
                     .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found"));
