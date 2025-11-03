@@ -30,8 +30,21 @@ public class EmailServiceImpl implements EmailService {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("ldy2009aa@gmail.com");
             message.setTo(request.getUserEmail());
-            message.setSubject("[Collab 이메일 인증 코드]");
-            message.setText("인증코드: " + code);
+            message.setSubject("[Collab] 이메일 인증을 완료해주세요!");
+            message.setText("안녕하세요, [회원님 이름 또는 Collab 회원님]!\n" +
+                    "\n" +
+                    "Collab 이메일 인증을 위한 코드를 보내드립니다.\n" +
+                    "아래 인증 코드를 입력하여 이메일 인증을 완료해주세요.\n" +
+                    "\n" +
+                    "---------------------------------\n" +
+                    "**✨ 인증 코드:  " + code + " ✨**\n" +
+                    "---------------------------------\n" +
+                    "\n" +
+                    "*   이 코드는 보안을 위해 10분 동안 유효합니다.\n" +
+                    "*   만약 본인이 요청한 것이 아니라면, 이 메일을 무시해주세요.\n" +
+                    "\n" +
+                    "감사합니다.\n" +
+                    "Collab 팀 드림");
 
             mailSender.send(message);
             return code;
