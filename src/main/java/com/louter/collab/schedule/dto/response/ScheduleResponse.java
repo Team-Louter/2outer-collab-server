@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 public class ScheduleResponse {
-    private Long userId;
+    private Long teamId;
     private Long scheduleId;
     private String scheduleTitle;
     private String scheduleContent;
@@ -24,7 +24,7 @@ public class ScheduleResponse {
     public static ScheduleResponse from(Schedule schedule) {
         return ScheduleResponse.builder()
                 .scheduleId(schedule.getScheduleId())
-                .userId(schedule.getUser().getUserId())
+                .teamId(schedule.getTeam().getTeamId())
                 .scheduleTitle(schedule.getScheduleTitle())
                 .scheduleContent(schedule.getScheduleContent())
                 .scheduleDate(schedule.getScheduleDate())

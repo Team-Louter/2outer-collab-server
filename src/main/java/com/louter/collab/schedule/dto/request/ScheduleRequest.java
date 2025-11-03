@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 public class ScheduleRequest {
     @NotNull
-    private Long userId;
+    private Long teamId;
 
     @NotNull
     private String scheduleTitle;

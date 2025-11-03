@@ -1,6 +1,7 @@
 package com.louter.collab.schedule.domain;
 
 import com.louter.collab.auth.domain.User;
+import com.louter.collab.team.domain.Team;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,5 +36,5 @@ public class Schedule {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Team team;
 }

@@ -1,12 +1,12 @@
 package com.louter.collab.schedule.controller;
 
-import com.louter.collab.auth.domain.User;
-import com.louter.collab.auth.repository.UserRepository;
 import com.louter.collab.common.exception.ScheduleNotFoundException;
 import com.louter.collab.schedule.domain.Schedule;
 import com.louter.collab.schedule.dto.request.ScheduleRequest;
 import com.louter.collab.schedule.dto.response.ScheduleResponse;
 import com.louter.collab.schedule.repository.ScheduleRepository;
+import com.louter.collab.team.domain.Team;
+import com.louter.collab.team.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,27 +14,26 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("user/{userId}/schedule")
+@RequestMapping("team/{teamId}/schedule")
 public class ScheduleController {
 
     private final ScheduleRepository scheduleRepository;
-    private final UserRepository userRepository;
+    private final TeamRepository teamRepository;
 
     // 일정 생성
     @PostMapping
     public ResponseEntity<Object> createSchedule(
-            @PathVariable Long userId,
+            @PathVariable Long teamId,
             @RequestBody ScheduleRequest scheduleRequest) {
         try {
-            User user = userRepository.findById(userId)
+            Team team = teamRepository.findByTeamId(teamId)
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
             Schedule schedule = Schedule.builder()
-                    .user(user)
+                    .team(team)
                     .scheduleTitle(scheduleRequest.getScheduleTitle())
                     .scheduleContent(scheduleRequest.getScheduleContent())
                     .scheduleDate(scheduleRequest.getScheduleDate())
@@ -54,15 +53,15 @@ public class ScheduleController {
 
     // 모든 일정 조회
     @GetMapping
-    public ResponseEntity<Object> getSchedules(@PathVariable Long userId) {
+    public ResponseEntity<Object> getSchedules(@PathVariable Long teamId) {
         try {
-            User user = userRepository.findById(userId)
+            Team team = teamRepository.findByTeamId(teamId)
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-            List<Schedule> schedules = scheduleRepository.findByUser(user);
+            List<Schedule> schedules = scheduleRepository.findByTeam(team);
             List<ScheduleResponse> response = schedules.stream()
                     .map(ScheduleResponse::from)
-                    .collect(Collectors.toList());
+                    .toList();
 
             return ResponseEntity.ok(Map.of("success", true, "schedules", response));
         } catch (Exception e) {
@@ -73,10 +72,10 @@ public class ScheduleController {
 
     // 특정 일정 조회
     @GetMapping("/{scheduleId}")
-    public ResponseEntity<Object> getSchedule(@PathVariable Long userId,
+    public ResponseEntity<Object> getSchedule(@PathVariable Long teamId,
                                               @PathVariable Long scheduleId) {
         try {
-            Schedule schedule = scheduleRepository.findByScheduleIdAndUserUserId(scheduleId, userId)
+            Schedule schedule = scheduleRepository.findByScheduleIdAndTeamTeamId(scheduleId, teamId)
                     .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found"));
 
             return ResponseEntity.ok(Map.of("success", true, "schedule", ScheduleResponse.from(schedule)));
@@ -91,11 +90,11 @@ public class ScheduleController {
 
     // 일정 수정
     @PutMapping("/{scheduleId}")
-    public ResponseEntity<Object> updateSchedule(@PathVariable Long userId,
+    public ResponseEntity<Object> updateSchedule(@PathVariable Long teamId,
                                                  @PathVariable Long scheduleId,
                                                  @RequestBody ScheduleRequest scheduleRequest) {
         try{
-            Schedule schedule = scheduleRepository.findByScheduleIdAndUserUserId(scheduleId, userId)
+            Schedule schedule = scheduleRepository.findByScheduleIdAndTeamTeamId(scheduleId, teamId)
                     .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found"));
 
             schedule.setScheduleTitle(scheduleRequest.getScheduleTitle());
@@ -117,10 +116,10 @@ public class ScheduleController {
 
     // 일정 삭제
     @DeleteMapping("/{scheduleId}")
-    public ResponseEntity<Object> deleteSchedule(@PathVariable Long userId,
+    public ResponseEntity<Object> deleteSchedule(@PathVariable Long teamId,
                                                  @PathVariable Long scheduleId) {
         try{
-            Schedule schedule = scheduleRepository.findByScheduleIdAndUserUserId(scheduleId, userId)
+            Schedule schedule = scheduleRepository.findByScheduleIdAndTeamTeamId(scheduleId, teamId)
                     .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found"));
 
             scheduleRepository.delete(schedule);
