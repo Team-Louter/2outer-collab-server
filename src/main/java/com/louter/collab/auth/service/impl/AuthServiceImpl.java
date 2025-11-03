@@ -51,10 +51,10 @@ public class AuthServiceImpl implements AuthService {
     public String login(LoginRequest loginRequest) {
         validationService.checkNull(loginRequest);
 
-        Long userId = loginRequest.getUserId();
+        String userEmail = loginRequest.getUserEmail();
         String userPassword = loginRequest.getUserPassword();
 
-        Optional<User> tempUser = userRepository.findByUserId(userId);
+        Optional<User> tempUser = userRepository.findByUserEmail(userEmail);
         if (tempUser.isEmpty()) {
             throw new UserNotFoundException("유저 조회 실패");
         }
