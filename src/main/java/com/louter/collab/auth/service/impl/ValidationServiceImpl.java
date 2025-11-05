@@ -81,8 +81,7 @@ public class ValidationServiceImpl implements ValidationService {
 
     @Override
     public void checkExistAccount(String userName, String userEmail) {
-        if (userRepository.existsByUserName(userName) ||
-                userRepository.existsByUserEmail(userEmail)) {
+        if (userRepository.existsByUserEmail(userEmail)) {
             throw new AlreadyUsingIdException("이미 존재함");
         }
     }
