@@ -39,7 +39,7 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public void checkUserName(String userName) {
         if (userName.length() < 2 || userName.length() > 20) {
-            throw new IllegalArgumentException("길이가 잘못됨");
+            throw new IllegalArgumentException("아이디 길이가 잘못됨");
         }
         if (!userName.matches("^[a-zA-Z0-9]+$")) {
             throw new IllegalArgumentException("영어, 숫자 이외의 글자");
@@ -55,7 +55,7 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public void checkPassword(String password, String confirmPassword) {
         if (password.length() < 8 || password.length() > 20) {
-            throw new IllegalArgumentException("길이가 잘못됨");
+            throw new IllegalArgumentException("비밀번호 길이가 잘못됨");
         }
         if (!password.matches("^[A-Za-z0-9@$!%*?&]+$")) {
             throw new IllegalArgumentException("영어, 숫자, 특수문자 이외의 글자");
@@ -75,14 +75,14 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public void checkEmail(String email) {
         if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-            throw new IllegalArgumentException("이메일 오류");
+            throw new IllegalArgumentException("이메일 일치하지 않습니다.");
         }
     }
 
     @Override
     public void checkExistAccount(String userName, String userEmail) {
         if (userRepository.existsByUserEmail(userEmail)) {
-            throw new AlreadyUsingIdException("이미 존재함");
+            throw new AlreadyUsingIdException("이미 존재하는 이메일");
         }
     }
 }
