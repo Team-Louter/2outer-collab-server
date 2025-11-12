@@ -1,0 +1,115 @@
+package com.louter.collab.chat.service.impl;
+
+import com.louter.collab.auth.domain.User;
+import com.louter.collab.auth.repository.UserRepository;
+import com.louter.collab.chat.domain.ChatMessage;
+import com.louter.collab.chat.domain.ChatMessageFile;
+import com.louter.collab.chat.domain.ChatReader;
+import com.louter.collab.chat.domain.ChatRoom;
+import com.louter.collab.chat.dto.request.ChatMessageRequest;
+import com.louter.collab.chat.dto.response.ChatMessageResponse;
+import com.louter.collab.chat.repository.ChatMessageFileRepository;
+import com.louter.collab.chat.repository.ChatMessageRepository;
+import com.louter.collab.chat.repository.ChatReaderRepository;
+import com.louter.collab.chat.repository.ChatRoomRepository;
+import com.louter.collab.chat.service.ChatService;
+import com.louter.collab.role.domain.Permission;
+import com.louter.collab.role.service.RoleService;
+import com.louter.collab.team.domain.Team;
+import com.louter.collab.team.repository.TeamRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ChatServiceImpl implements ChatService {
+
+    private final ChatMessageRepository chatMessageRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageFileRepository chatMessageFileRepository;
+    private final ChatReaderRepository chatReaderRepository;
+    private final TeamRepository teamRepository;
+    private final RoleService roleService;
+    private final UserRepository userRepository;
+
+    @Override
+    @Transactional
+    public ChatMessageResponse saveMessage(Long chatRoomId, Long senderId, ChatMessageRequest request) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat room not found"));
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new IllegalArgumentException("Sender not found"));
+
+        ChatMessage chatMessage = ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .sender(sender)
+                .message(request.getMessage())
+                .build();
+
+        ChatMessage savedMessage = chatMessageRepository.save(chatMessage);
+
+        if (request.getFileUrls() != null && !request.getFileUrls().isEmpty()) {
+            request.getFileUrls().forEach(fileUrl -> {
+                ChatMessageFile chatMessageFile = ChatMessageFile.builder()
+                        .chatMessage(savedMessage)
+                        .fileUrl(fileUrl)
+                        .build();
+                chatMessageFileRepository.save(chatMessageFile);
+            });
+        }
+
+        return ChatMessageResponse.builder()
+                .messageId(savedMessage.getId())
+                .senderId(savedMessage.getSender().getUserId())
+                .senderName(savedMessage.getSender().getUserName())
+                .message(savedMessage.getMessage())
+                .createdAt(savedMessage.getCreatedAt())
+                .fileUrls(request.getFileUrls())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void markMessageAsRead(Long chatRoomId, Long messageId, Long userId) {
+        ChatMessage chatMessage = chatMessageRepository.findById(messageId)
+                .orElseThrow(() -> new IllegalArgumentException("Message not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!chatMessage.getChatRoom().getId().equals(chatRoomId)) {
+            throw new IllegalArgumentException("Message does not belong to the specified chat room");
+        }
+
+        ChatReader.ChatReaderId chatReaderId = new ChatReader.ChatReaderId(messageId, user.getUserId());
+        if (!chatReaderRepository.existsById(chatReaderId)) {
+            ChatReader chatReader = ChatReader.builder()
+                    .chatMessage(chatMessage)
+                    .user(user)
+                    .build();
+            chatReaderRepository.save(chatReader);
+        }
+    }
+
+    @Override
+    @Transactional
+    public ChatRoom createChatRoom(Long teamId, String channelName, User creator) {
+        // 팀 존재 확인
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+
+        // 채널 생성 권한 확인 (MANAGE_CHANNELS 퍼미션 필요)
+        if (!roleService.hasPermission(creator.getUserId(), teamId, Permission.MANAGE_CHANNELS)) {
+            throw new IllegalArgumentException("You do not have permission to create a channel.");
+        }
+
+        // 채팅방 생성
+        ChatRoom chatRoom = ChatRoom.builder()
+                .team(team)
+                .channelName(channelName)
+                .build();
+
+        return chatRoomRepository.save(chatRoom);
+    }
+}

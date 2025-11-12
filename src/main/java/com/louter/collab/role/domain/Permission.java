@@ -9,6 +9,9 @@ public enum Permission {
     
     // 회의록/일정
     MEETING_SCHEDULE("회의록/일정 편집"),
+
+    // 채널 관리
+    MANAGE_CHANNELS("채널 생성/삭제/편집"),
     
     // 팀 채팅
     TEAM_CHAT("팀 채팅");

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body { font-family: sans-serif; }
+        #chat-window { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; }
+        .message { margin-bottom: 5px; }
+        .sender { font-weight: bold; }
+    </style>
+</head>
+<body>
+<h1>Chat Room</h1>
+<div>
+    <label for="roomId">Room ID:</label>
+    <input type="text" id="roomId" value="1"/>
+    <label for="token">JWT Token:</label>
+    <input type="text" id="token" placeholder="Enter your JWT token here"/>
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()" disabled>Disconnect</button>
+</div>
+<hr/>
+<div id="chat-window"></div>
+<hr/>
+<div>
+    <input type="text" id="message" placeholder="Type a message..."/>
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    let stompClient = null;
+    let roomId = null;
+
+    function connect() {
+        roomId = document.getElementById('roomId').value;
+        const token = document.getElementById('token').value;
+
+        if (!roomId || !token) {
+            alert('Please enter Room ID and JWT Token.');
+            return;
+        }
+
+        const socket = new SockJS('/ws-stomp');
+        stompClient = Stomp.over(socket);
+
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        };
+
+        stompClient.connect(headers, function (frame) {
+            console.log('Connected: ' + frame);
+            document.querySelector('button[onclick="connect()"]').disabled = true;
+            document.querySelector('button[onclick="disconnect()"]').disabled = false;
+
+            stompClient.subscribe('/sub/chat/rooms/' + roomId, function (message) {
+                showMessage(JSON.parse(message.body));
+            });
+        }, function(error) {
+            console.error('Connection error: ' + error);
+            alert('Connection failed. Check the console for details.');
+        });
+    }
+
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+        }
+        document.querySelector('button[onclick="connect()"]').disabled = false;
+        document.querySelector('button[onclick="disconnect()"]').disabled = true;
+        console.log("Disconnected");
+    }
+
+    function sendMessage() {
+        const messageInput = document.getElementById('message');
+        const messageContent = messageInput.value;
+        if (messageContent && stompClient) {
+            const chatMessage = {
+                message: messageContent,
+                fileUrls: [] // 파일 업로드는 별도 구현 필요
+            };
+            stompClient.send("/pub/chat/rooms/" + roomId + "/send", {}, JSON.stringify(chatMessage));
+            messageInput.value = '';
+        }
+    }
+
+    function showMessage(message) {
+        const chatWindow = document.getElementById('chat-window');
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+
+        const senderElement = document.createElement('span');
+        senderElement.classList.add('sender');
+        senderElement.textContent = message.senderName + ': ';
+
+        const contentElement = document.createElement('span');
+        contentElement.textContent = message.message;
+
+        messageElement.appendChild(senderElement);
+        messageElement.appendChild(contentElement);
+
+        chatWindow.appendChild(messageElement);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+</script>
+</body>
+</html>

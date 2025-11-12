@@ -8,6 +8,7 @@ import com.louter.collab.team.dto.response.TeamMemberResponse;
 import com.louter.collab.team.dto.response.TeamResponse;
 import com.louter.collab.team.service.TeamService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,14 +35,16 @@ public class TeamController {
         Long userId = getCurrentUserId();
         Team team = teamService.createTeam(userId, request.getTeamName(), 
                 request.getProfilePicture(), request.getBannerPicture(), request.getIntro());
-        return ResponseEntity.ok(TeamResponse.from(team));
+        List<Long> chatRoomIds = teamService.getChatRoomIds(team.getTeamId());
+        return ResponseEntity.ok(TeamResponse.from(team, chatRoomIds));
     }
 
     // 팀 조회
     @GetMapping("/{teamId}")
     public ResponseEntity<TeamResponse> getTeam(@PathVariable Long teamId) {
         Team team = teamService.getTeam(teamId);
-        return ResponseEntity.ok(TeamResponse.from(team));
+        List<Long> chatRoomIds = teamService.getChatRoomIds(teamId);
+        return ResponseEntity.ok(TeamResponse.from(team, chatRoomIds));
     }
 
     // 팀 수정
@@ -52,7 +55,8 @@ public class TeamController {
         Long userId = getCurrentUserId();
         Team team = teamService.updateTeam(userId, teamId, request.getTeamName(), 
                 request.getProfilePicture(), request.getBannerPicture(), request.getIntro());
-        return ResponseEntity.ok(TeamResponse.from(team));
+        List<Long> chatRoomIds = teamService.getChatRoomIds(teamId);
+        return ResponseEntity.ok(TeamResponse.from(team, chatRoomIds));
     }
 
     // 팀 삭제
@@ -113,18 +117,22 @@ public class TeamController {
         return ResponseEntity.ok(Map.of("success", true, "message", "팀원이 추방되었습니다."));
     }
 
-    // 내가 속한 팀 목록
+    // 내 팀 목록 조회
     @GetMapping("/my-teams")
-    public ResponseEntity<List<TeamResponse>> getMyTeams() {
+    public ResponseEntity<List<TeamResponse>> getUserTeams() {
         Long userId = getCurrentUserId();
-        var teams = teamService.getUserTeams(userId);
-        var responses = teams.stream()
-                .map(TeamResponse::from)
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<Team> teams = teamService.getUserTeams(userId);
+        List<TeamResponse> responses = teams.stream()
+                .map(team -> {
+                    List<Long> chatRoomIds = teamService.getChatRoomIds(team.getTeamId());
+                    return TeamResponse.from(team, chatRoomIds);
+                })
                 .toList();
         return ResponseEntity.ok(responses);
-    }
-
-    // 팀 멤버 목록
+    }    // 팀 멤버 목록
     @GetMapping("/{teamId}/members")
     public ResponseEntity<List<TeamMemberResponse>> getTeamMembers(@PathVariable Long teamId) {
         var members = teamService.getTeamMembers(teamId);

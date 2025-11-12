@@ -2,6 +2,8 @@ package com.louter.collab.team.service.impl;
 
 import com.louter.collab.auth.domain.User;
 import com.louter.collab.auth.repository.UserRepository;
+import com.louter.collab.chat.domain.ChatRoom;
+import com.louter.collab.chat.repository.ChatRoomRepository;
 import com.louter.collab.common.exception.IllegalArgumentException;
 import com.louter.collab.common.exception.UserNotFoundException;
 import com.louter.collab.role.domain.Permission;
@@ -16,6 +18,7 @@ import com.louter.collab.team.repository.TeamRepository;
 import com.louter.collab.team.repository.UserTeamRepository;
 import com.louter.collab.team.service.TeamService;
 import lombok.RequiredArgsConstructor;
+import lombok.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +35,11 @@ public class TeamServiceImpl implements TeamService {
     private final TeamJoinRequestRepository teamJoinRequestRepository;
     private final UserRepository userRepository;
     private final RoleService roleService;
+    private final ChatRoomRepository chatRoomRepository;
 
     @Override
     @Transactional
-    public Team createTeam(Long creatorId, String teamName, String profilePicture, String bannerPicture, String intro) {
+    public Team createTeam(@NonNull Long creatorId, @NonNull String teamName, String profilePicture, String bannerPicture, String intro) {
         // 유저 존재 확인
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
@@ -54,6 +58,13 @@ public class TeamServiceImpl implements TeamService {
                 .intro(intro)
                 .build();
         team = teamRepository.save(team);
+
+        // 기본 채팅방 생성
+        ChatRoom generalChatRoom = ChatRoom.builder()
+                .team(team)
+                .channelName("General")
+                .build();
+        chatRoomRepository.save(generalChatRoom);
 
         // 기본 권한 생성 (멤버, 관리자)
         roleService.createDefaultMemberRole(team.getTeamId());
@@ -74,7 +85,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public void deleteTeam(Long userId, Long teamId, String confirmTeamName) {
+    public void deleteTeam(@NonNull Long userId, @NonNull Long teamId, @NonNull String confirmTeamName) {
         // 팀 존재 확인
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
@@ -105,7 +116,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public TeamJoinRequest requestJoinTeam(Long userId, Long teamId) {
+    public TeamJoinRequest requestJoinTeam(@NonNull Long userId, @NonNull Long teamId) {
         // 유저 존재 확인
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
@@ -137,7 +148,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public void processJoinRequest(Long adminUserId, Long requestId, boolean approve) {
+    public void processJoinRequest(@NonNull Long adminUserId, @NonNull Long requestId, boolean approve) {
         // 가입 신청 존재 확인
         TeamJoinRequest joinRequest = teamJoinRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("가입 신청을 찾을 수 없습니다."));
@@ -190,7 +201,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<TeamJoinRequest> getPendingJoinRequests(Long teamId) {
+    public List<TeamJoinRequest> getPendingJoinRequests(@NonNull Long teamId) {
         // 팀 존재 확인
         if (!teamRepository.existsById(teamId)) {
             throw new IllegalArgumentException("팀을 찾을 수 없습니다.");
@@ -202,7 +213,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public void leaveTeam(Long userId, Long teamId) {
+    public void leaveTeam(@NonNull Long userId, @NonNull Long teamId) {
         // 팀 존재 확인
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
@@ -223,7 +234,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public void kickMember(Long adminUserId, Long teamId, Long targetUserId) {
+    public void kickMember(@NonNull Long adminUserId, @NonNull Long teamId, @NonNull Long targetUserId) {
         // 관리자 권한 확인 (TEAM_SETTINGS 퍼미션 필요)
         if (!roleService.hasPermission(adminUserId, teamId, Permission.TEAM_SETTINGS)) {
             throw new IllegalArgumentException("팀원을 추방할 권한이 없습니다.");
@@ -253,13 +264,13 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Team getTeam(Long teamId) {
+    public Team getTeam(@NonNull Long teamId) {
         return teamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
     }
 
     @Override
-    public List<Team> getUserTeams(Long userId) {
+    public List<Team> getUserTeams(@NonNull Long userId) {
         List<UserTeam> userTeams = userTeamRepository.findByUser_UserId(userId);
         return userTeams.stream()
                 .map(UserTeam::getTeam)
@@ -267,7 +278,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<UserTeam> getTeamMembers(Long teamId) {
+    public List<UserTeam> getTeamMembers(@NonNull Long teamId) {
         // 팀 존재 확인
         if (!teamRepository.existsById(teamId)) {
             throw new IllegalArgumentException("팀을 찾을 수 없습니다.");
@@ -278,7 +289,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public void changeMemberRole(Long adminUserId, Long teamId, Long targetUserId, Long newRoleId) {
+    public void changeMemberRole(@NonNull Long adminUserId, @NonNull Long teamId, @NonNull Long targetUserId, @NonNull Long newRoleId) {
         // 팀 존재 확인
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
@@ -314,7 +325,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public Team updateTeam(Long userId, Long teamId, String teamName, String profilePicture, String bannerPicture, String intro) {
+    public Team updateTeam(@NonNull Long userId, @NonNull Long teamId, String teamName, String profilePicture, String bannerPicture, String intro) {
         // 팀 존재 확인
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
@@ -344,5 +355,12 @@ public class TeamServiceImpl implements TeamService {
         }
 
         return teamRepository.save(team);
+    }
+
+    @Override
+    public List<Long> getChatRoomIds(@NonNull Long teamId) {
+        return chatRoomRepository.findByTeam_TeamId(teamId).stream()
+                .map(ChatRoom::getId)
+                .collect(Collectors.toList());
     }
 }

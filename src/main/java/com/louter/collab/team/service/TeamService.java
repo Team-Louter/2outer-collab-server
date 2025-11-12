@@ -66,4 +66,9 @@ public interface TeamService {
      * 팀 정보 수정 (생성자만 가능)
      */
     Team updateTeam(Long userId, Long teamId, String teamName, String profilePicture, String bannerPicture, String intro);
+
+    /**
+     * 팀의 채팅방 ID 목록 조회
+     */
+    List<Long> getChatRoomIds(Long teamId);
 }
