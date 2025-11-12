@@ -31,27 +31,36 @@ public class JwtFilter extends OncePerRequestFilter {
                 path.startsWith("/auth/") ||
                 path.startsWith("/email/") ||
                 path.startsWith("/swagger-ui/") ||
-                path.startsWith("/v3/api-docs/") ||
+                path.startsWith("/v3/api-docs") ||
                 path.startsWith("/api-docs") ||
-                path.startsWith("/teams/")) {
+                path.equals("/chat.html") ||
+                path.startsWith("/ws-stomp") ||
+                path.startsWith("/ws/")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-//        String authHeader = request.getHeader("Authorization");
-
+        // First, try Authorization header (Bearer <token>) to support clients that send token in header
+        String authHeader = request.getHeader("Authorization");
         String token = null;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("token".equals(cookie.getName())) {
-                    token = cookie.getValue();
-                    break;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7).trim();
+        }
+
+        // If no header token, fallback to cookie named "token"
+        if (token == null) {
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("token".equals(cookie.getName())) {
+                        token = cookie.getValue();
+                        break;
+                    }
                 }
             }
         }
 
-        if(token != null) {
+        if (token != null) {
             try{
                 jwtAuth.validateToken(token);
                 Long userId = jwtAuth.userIdFromToken(token);

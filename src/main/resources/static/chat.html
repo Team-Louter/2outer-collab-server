@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body { font-family: sans-serif; }
+        #chat-window { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; }
+        .message { margin-bottom: 5px; }
+        .sender { font-weight: bold; }
+    </style>
+</head>
+<body>
+<h1>Chat Room</h1>
+<div>
+    <label for="teamId">Team ID:</label>
+    <input type="text" id="teamId" value="1"/>
+    <label for="roomId">Room ID:</label>
+    <input type="text" id="roomId" value="1"/>
+    <label for="token">JWT Token:</label>
+    <input type="text" id="token" placeholder="Enter your JWT token here"/>
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()" disabled>Disconnect</button>
+</div>
+<hr/>
+<div id="chat-window"></div>
+<hr/>
+<div>
+    <input type="text" id="message" placeholder="Type a message..."/>
+    <input type="file" id="fileInput" />
+    <button onclick="uploadFile()">Upload</button>
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+    let stompClient = null;
+    let teamId = null;
+    let roomId = null;
+
+    function connect() {
+        teamId = document.getElementById('teamId').value;
+        roomId = document.getElementById('roomId').value;
+        const token = document.getElementById('token').value;
+
+        if (!teamId || !roomId || !token) {
+            alert('Please enter Team ID, Room ID and JWT Token.');
+            return;
+        }
+
+        const socket = new SockJS('/ws-stomp');
+        stompClient = Stomp.over(socket);
+
+        const headers = {
+            'Authorization': 'Bearer ' + token
+        };
+
+        stompClient.connect(headers, function (frame) {
+            console.log('Connected: ' + frame);
+            document.querySelector('button[onclick="connect()"]').disabled = true;
+            document.querySelector('button[onclick="disconnect()"]').disabled = false;
+
+            // 이전 메시지 불러오기
+            loadPreviousMessages(token);
+
+            stompClient.subscribe('/sub/teams/' + teamId + '/chat/' + roomId, function (message) {
+                showMessage(JSON.parse(message.body));
+            });
+        }, function(error) {
+            console.error('Connection error: ' + error);
+            alert('Connection failed. Check the console for details.');
+        });
+    }
+
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+        }
+        document.querySelector('button[onclick="connect()"]').disabled = false;
+        document.querySelector('button[onclick="disconnect()"]').disabled = true;
+        console.log("Disconnected");
+    }
+
+    function sendMessage() {
+        const messageInput = document.getElementById('message');
+        const messageContent = messageInput.value;
+        if (messageContent && stompClient) {
+            const chatMessage = {
+                message: messageContent,
+                fileUrls: pendingFileUrls.slice() // 복사하여 전송
+            };
+            stompClient.send("/pub/teams/" + teamId + "/chat/" + roomId + "/send", {}, JSON.stringify(chatMessage));
+            messageInput.value = '';
+            // 전송 후에는 대기 중인 파일 URL 목록 비우기
+            pendingFileUrls = [];
+            renderPendingFiles();
+        }
+    }
+
+    function loadPreviousMessages(token) {
+        fetch(`/teams/${teamId}/chat/${roomId}/messages`, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to load messages');
+            }
+            return response.json();
+        })
+        .then(messages => {
+            messages.forEach(message => {
+                showMessage(message);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading previous messages:', error);
+        });
+    }
+    let pendingFileUrls = [];
+
+    async function uploadFile() {
+        const input = document.getElementById('fileInput');
+        const file = input.files[0];
+        const token = document.getElementById('token').value;
+        if (!file) {
+            alert('Select a file first');
+            return;
+        }
+        if (!token) {
+            alert('Enter JWT token before uploading');
+            return;
+        }
+
+        const fd = new FormData();
+        fd.append('file', file);
+
+        try {
+            const res = await fetch('/files/upload', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                body: fd
+            });
+
+            if (!res.ok) {
+                throw new Error('Upload failed: ' + res.status);
+            }
+
+            // 서버는 file URL 문자열을 반환
+            const url = await res.text();
+            pendingFileUrls.push(url);
+            renderPendingFiles();
+            // clear file input
+            input.value = '';
+        } catch (e) {
+            console.error('File upload error', e);
+            alert('File upload failed. Check console.');
+        }
+    }
+
+    function renderPendingFiles() {
+        const chatWindow = document.getElementById('chat-window');
+        // remove existing pending-files container if present
+        let pending = document.getElementById('pending-files');
+        if (pending) pending.remove();
+
+        if (pendingFileUrls.length === 0) return;
+
+        pending = document.createElement('div');
+        pending.id = 'pending-files';
+        pending.style.margin = '8px 0';
+        pendingFileUrls.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.maxWidth = '120px';
+            img.style.maxHeight = '120px';
+            img.style.marginRight = '6px';
+            pending.appendChild(img);
+        });
+        chatWindow.parentNode.insertBefore(pending, chatWindow.nextSibling);
+    }
+
+    function showMessage(message) {
+        const chatWindow = document.getElementById('chat-window');
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+
+        const senderElement = document.createElement('span');
+        senderElement.classList.add('sender');
+        senderElement.textContent = message.senderName + ': ';
+
+        const contentElement = document.createElement('span');
+        contentElement.textContent = message.message;
+
+        messageElement.appendChild(senderElement);
+        messageElement.appendChild(contentElement);
+
+        // Render attached images if present
+        if (message.fileUrls && Array.isArray(message.fileUrls) && message.fileUrls.length > 0) {
+            const filesContainer = document.createElement('div');
+            filesContainer.classList.add('files');
+            filesContainer.style.marginTop = '6px';
+
+            message.fileUrls.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.style.maxWidth = '200px';
+                img.style.maxHeight = '200px';
+                img.style.display = 'inline-block';
+                img.style.marginRight = '8px';
+                filesContainer.appendChild(img);
+            });
+
+            messageElement.appendChild(filesContainer);
+        }
+
+        chatWindow.appendChild(messageElement);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+</script>
+</body>
+</html>

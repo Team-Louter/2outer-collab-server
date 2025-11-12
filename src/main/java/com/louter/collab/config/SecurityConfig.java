@@ -33,12 +33,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/favicon.ico").permitAll()
                         // 기본 경로
-                        .requestMatchers("/", "/auth/**").permitAll()
+                        .requestMatchers("/", "/auth/**", "/email/**").permitAll()
                         // 스웨거
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs").permitAll()
-                        // 임시: 팀/권한 API 테스트용 (JWT 구현 후 제거)
-                        .requestMatchers("/teams/**").permitAll()
-                        .anyRequest().permitAll()  // 임시: 모든 요청 허용
+                        // WebSocket & 채팅
+                        .requestMatchers("/chat.html").permitAll()
+                        .requestMatchers("/ws/**", "/ws-stomp/**").permitAll()
+                        // 팀/권한 API
+                        .requestMatchers("/teams/**").authenticated()
+                        .anyRequest().authenticated()  // 나머지 모든 요청은 인증 필요
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
