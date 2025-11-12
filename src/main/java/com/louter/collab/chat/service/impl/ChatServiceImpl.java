@@ -62,15 +62,15 @@ public class ChatServiceImpl implements ChatService {
 
         ChatMessage savedMessage = chatMessageRepository.save(chatMessage);
 
-        if (request.getFileUrls() != null && !request.getFileUrls().isEmpty()) {
-            request.getFileUrls().forEach(fileUrl -> {
-                ChatMessageFile chatMessageFile = ChatMessageFile.builder()
-                        .chatMessage(savedMessage)
-                        .fileUrl(fileUrl)
-                        .build();
-                chatMessageFileRepository.save(chatMessageFile);
-            });
-        }
+    if (request.getFileUrls() != null && !request.getFileUrls().isEmpty()) {
+        List<ChatMessageFile> files = request.getFileUrls().stream()
+            .map(fileUrl -> ChatMessageFile.builder()
+                .chatMessage(savedMessage)
+                .fileUrl(fileUrl)
+                .build())
+            .collect(Collectors.toList());
+        chatMessageFileRepository.saveAll(files);
+    }
 
         return ChatMessageResponse.builder()
                 .messageId(savedMessage.getId())

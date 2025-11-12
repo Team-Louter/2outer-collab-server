@@ -31,6 +31,21 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(@NonNull ChannelRegistration registration) {
-        registration.interceptors(webSocketAuthInterceptor);
+        // Configure a larger thread pool for inbound messages to avoid blocking the STOMP threads
+    registration.taskExecutor()
+        .corePoolSize(8)
+        .maxPoolSize(16)
+        .queueCapacity(100);
+
+    registration.interceptors(webSocketAuthInterceptor);
+    }
+
+    @Override
+    public void configureClientOutboundChannel(@NonNull ChannelRegistration registration) {
+        // Configure outbound thread pool to better handle broadcasts to many subscribers
+    registration.taskExecutor()
+        .corePoolSize(8)
+        .maxPoolSize(16)
+        .queueCapacity(200);
     }
 }

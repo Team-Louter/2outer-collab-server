@@ -29,6 +29,8 @@
 <hr/>
 <div>
     <input type="text" id="message" placeholder="Type a message..."/>
+    <input type="file" id="fileInput" />
+    <button onclick="uploadFile()">Upload</button>
     <button onclick="sendMessage()">Send</button>
 </div>
 
@@ -86,10 +88,13 @@
         if (messageContent && stompClient) {
             const chatMessage = {
                 message: messageContent,
-                fileUrls: [] // 파일 업로드는 별도 구현 필요
+                fileUrls: pendingFileUrls.slice() // 복사하여 전송
             };
             stompClient.send("/pub/teams/" + teamId + "/chat/" + roomId + "/send", {}, JSON.stringify(chatMessage));
             messageInput.value = '';
+            // 전송 후에는 대기 중인 파일 URL 목록 비우기
+            pendingFileUrls = [];
+            renderPendingFiles();
         }
     }
 
@@ -116,6 +121,70 @@
             console.error('Error loading previous messages:', error);
         });
     }
+    let pendingFileUrls = [];
+
+    async function uploadFile() {
+        const input = document.getElementById('fileInput');
+        const file = input.files[0];
+        const token = document.getElementById('token').value;
+        if (!file) {
+            alert('Select a file first');
+            return;
+        }
+        if (!token) {
+            alert('Enter JWT token before uploading');
+            return;
+        }
+
+        const fd = new FormData();
+        fd.append('file', file);
+
+        try {
+            const res = await fetch('/files/upload', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                body: fd
+            });
+
+            if (!res.ok) {
+                throw new Error('Upload failed: ' + res.status);
+            }
+
+            // 서버는 file URL 문자열을 반환
+            const url = await res.text();
+            pendingFileUrls.push(url);
+            renderPendingFiles();
+            // clear file input
+            input.value = '';
+        } catch (e) {
+            console.error('File upload error', e);
+            alert('File upload failed. Check console.');
+        }
+    }
+
+    function renderPendingFiles() {
+        const chatWindow = document.getElementById('chat-window');
+        // remove existing pending-files container if present
+        let pending = document.getElementById('pending-files');
+        if (pending) pending.remove();
+
+        if (pendingFileUrls.length === 0) return;
+
+        pending = document.createElement('div');
+        pending.id = 'pending-files';
+        pending.style.margin = '8px 0';
+        pendingFileUrls.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.maxWidth = '120px';
+            img.style.maxHeight = '120px';
+            img.style.marginRight = '6px';
+            pending.appendChild(img);
+        });
+        chatWindow.parentNode.insertBefore(pending, chatWindow.nextSibling);
+    }
 
     function showMessage(message) {
         const chatWindow = document.getElementById('chat-window');
@@ -131,6 +200,25 @@
 
         messageElement.appendChild(senderElement);
         messageElement.appendChild(contentElement);
+
+        // Render attached images if present
+        if (message.fileUrls && Array.isArray(message.fileUrls) && message.fileUrls.length > 0) {
+            const filesContainer = document.createElement('div');
+            filesContainer.classList.add('files');
+            filesContainer.style.marginTop = '6px';
+
+            message.fileUrls.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.style.maxWidth = '200px';
+                img.style.maxHeight = '200px';
+                img.style.display = 'inline-block';
+                img.style.marginRight = '8px';
+                filesContainer.appendChild(img);
+            });
+
+            messageElement.appendChild(filesContainer);
+        }
 
         chatWindow.appendChild(messageElement);
         chatWindow.scrollTop = chatWindow.scrollHeight;
