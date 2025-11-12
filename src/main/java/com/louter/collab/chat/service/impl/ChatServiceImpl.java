@@ -8,6 +8,7 @@ import com.louter.collab.chat.domain.ChatReader;
 import com.louter.collab.chat.domain.ChatRoom;
 import com.louter.collab.chat.dto.request.ChatMessageRequest;
 import com.louter.collab.chat.dto.response.ChatMessageResponse;
+import com.louter.collab.chat.dto.response.ChatRoomResponse;
 import com.louter.collab.chat.repository.ChatMessageFileRepository;
 import com.louter.collab.chat.repository.ChatMessageRepository;
 import com.louter.collab.chat.repository.ChatReaderRepository;
@@ -17,9 +18,13 @@ import com.louter.collab.role.domain.Permission;
 import com.louter.collab.role.service.RoleService;
 import com.louter.collab.team.domain.Team;
 import com.louter.collab.team.repository.TeamRepository;
+import com.louter.collab.team.repository.UserTeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +36,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatMessageFileRepository chatMessageFileRepository;
     private final ChatReaderRepository chatReaderRepository;
     private final TeamRepository teamRepository;
+    private final UserTeamRepository userTeamRepository;
     private final RoleService roleService;
     private final UserRepository userRepository;
 
@@ -41,6 +47,12 @@ public class ChatServiceImpl implements ChatService {
                 .orElseThrow(() -> new IllegalArgumentException("Chat room not found"));
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new IllegalArgumentException("Sender not found"));
+
+        // 사용자가 해당 팀의 멤버인지 확인
+        Long teamId = chatRoom.getTeam().getTeamId();
+        if (!userTeamRepository.existsByUser_UserIdAndTeam_TeamId(senderId, teamId)) {
+            throw new IllegalArgumentException("You are not a member of this team");
+        }
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
@@ -82,6 +94,12 @@ public class ChatServiceImpl implements ChatService {
             throw new IllegalArgumentException("Message does not belong to the specified chat room");
         }
 
+        // 사용자가 해당 팀의 멤버인지 확인
+        Long teamId = chatMessage.getChatRoom().getTeam().getTeamId();
+        if (!userTeamRepository.existsByUser_UserIdAndTeam_TeamId(userId, teamId)) {
+            throw new IllegalArgumentException("You are not a member of this team");
+        }
+
         ChatReader.ChatReaderId chatReaderId = new ChatReader.ChatReaderId(messageId, user.getUserId());
         if (!chatReaderRepository.existsById(chatReaderId)) {
             ChatReader chatReader = ChatReader.builder()
@@ -111,5 +129,17 @@ public class ChatServiceImpl implements ChatService {
                 .build();
 
         return chatRoomRepository.save(chatRoom);
+    }
+
+    @Override
+    public List<ChatRoomResponse> getChatRoomsByTeam(Long teamId) {
+        // 팀 존재 확인
+        teamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+        
+        List<ChatRoom> chatRooms = chatRoomRepository.findByTeam_TeamId(teamId);
+        return chatRooms.stream()
+                .map(ChatRoomResponse::new)
+                .collect(Collectors.toList());
     }
 }

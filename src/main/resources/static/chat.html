@@ -15,6 +15,8 @@
 <body>
 <h1>Chat Room</h1>
 <div>
+    <label for="teamId">Team ID:</label>
+    <input type="text" id="teamId" value="1"/>
     <label for="roomId">Room ID:</label>
     <input type="text" id="roomId" value="1"/>
     <label for="token">JWT Token:</label>
@@ -32,14 +34,16 @@
 
 <script>
     let stompClient = null;
+    let teamId = null;
     let roomId = null;
 
     function connect() {
+        teamId = document.getElementById('teamId').value;
         roomId = document.getElementById('roomId').value;
         const token = document.getElementById('token').value;
 
-        if (!roomId || !token) {
-            alert('Please enter Room ID and JWT Token.');
+        if (!teamId || !roomId || !token) {
+            alert('Please enter Team ID, Room ID and JWT Token.');
             return;
         }
 
@@ -55,7 +59,7 @@
             document.querySelector('button[onclick="connect()"]').disabled = true;
             document.querySelector('button[onclick="disconnect()"]').disabled = false;
 
-            stompClient.subscribe('/sub/chat/rooms/' + roomId, function (message) {
+            stompClient.subscribe('/sub/teams/' + teamId + '/chat/' + roomId, function (message) {
                 showMessage(JSON.parse(message.body));
             });
         }, function(error) {
@@ -81,7 +85,7 @@
                 message: messageContent,
                 fileUrls: [] // 파일 업로드는 별도 구현 필요
             };
-            stompClient.send("/pub/chat/rooms/" + roomId + "/send", {}, JSON.stringify(chatMessage));
+            stompClient.send("/pub/teams/" + teamId + "/chat/" + roomId + "/send", {}, JSON.stringify(chatMessage));
             messageInput.value = '';
         }
     }
