@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -28,7 +29,7 @@ public class ChatReader {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     @Column(name = "last_read_at")
     private LocalDateTime lastReadAt;
 
