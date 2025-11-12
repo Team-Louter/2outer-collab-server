@@ -14,4 +14,5 @@ public interface ChatService {
     void markMessageAsRead(Long chatRoomId, Long messageId, Long userId);
     ChatRoom createChatRoom(Long teamId, String channelName, User creator);
     List<ChatRoomResponse> getChatRoomsByTeam(Long teamId);
+    List<ChatMessageResponse> getChatMessages(Long teamId, Long roomId, Long userId);
 }

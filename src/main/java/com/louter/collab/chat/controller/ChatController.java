@@ -13,6 +13,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,5 +49,14 @@ public class ChatController {
     @GetMapping("/teams/{teamId}/chat/rooms")
     public ResponseEntity<List<ChatRoomResponse>> getChatRooms(@PathVariable Long teamId) {
         return ResponseEntity.ok(chatService.getChatRoomsByTeam(teamId));
+    }
+
+    @GetMapping("/teams/{teamId}/chat/{roomId}/messages")
+    public ResponseEntity<List<ChatMessageResponse>> getChatMessages(
+            @PathVariable Long teamId,
+            @PathVariable Long roomId,
+            Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        return ResponseEntity.ok(chatService.getChatMessages(teamId, roomId, userId));
     }
 }

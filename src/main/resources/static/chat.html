@@ -59,6 +59,9 @@
             document.querySelector('button[onclick="connect()"]').disabled = true;
             document.querySelector('button[onclick="disconnect()"]').disabled = false;
 
+            // 이전 메시지 불러오기
+            loadPreviousMessages(token);
+
             stompClient.subscribe('/sub/teams/' + teamId + '/chat/' + roomId, function (message) {
                 showMessage(JSON.parse(message.body));
             });
@@ -88,6 +91,30 @@
             stompClient.send("/pub/teams/" + teamId + "/chat/" + roomId + "/send", {}, JSON.stringify(chatMessage));
             messageInput.value = '';
         }
+    }
+
+    function loadPreviousMessages(token) {
+        fetch(`/teams/${teamId}/chat/${roomId}/messages`, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to load messages');
+            }
+            return response.json();
+        })
+        .then(messages => {
+            messages.forEach(message => {
+                showMessage(message);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading previous messages:', error);
+        });
     }
 
     function showMessage(message) {

@@ -142,4 +142,42 @@ public class ChatServiceImpl implements ChatService {
                 .map(ChatRoomResponse::new)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<ChatMessageResponse> getChatMessages(Long teamId, Long roomId, Long userId) {
+        // 채팅방 존재 확인
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Chat room not found"));
+
+        // 채팅방이 해당 팀에 속하는지 확인
+        if (!chatRoom.getTeam().getTeamId().equals(teamId)) {
+            throw new IllegalArgumentException("Chat room does not belong to the specified team");
+        }
+
+        // 사용자가 해당 팀의 멤버인지 확인
+        if (!userTeamRepository.existsByUser_UserIdAndTeam_TeamId(userId, teamId)) {
+            throw new IllegalArgumentException("You are not a member of this team");
+        }
+
+        // 채팅 메시지 조회
+        List<ChatMessage> messages = chatMessageRepository.findByChatRoom_IdOrderByCreatedAtAsc(roomId);
+        
+        return messages.stream()
+                .map(message -> {
+                    List<String> fileUrls = chatMessageFileRepository.findByChatMessage_Id(message.getId())
+                            .stream()
+                            .map(ChatMessageFile::getFileUrl)
+                            .collect(Collectors.toList());
+                    
+                    return ChatMessageResponse.builder()
+                            .messageId(message.getId())
+                            .senderId(message.getSender().getUserId())
+                            .senderName(message.getSender().getUserName())
+                            .message(message.getMessage())
+                            .createdAt(message.getCreatedAt())
+                            .fileUrls(fileUrls)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
 }
