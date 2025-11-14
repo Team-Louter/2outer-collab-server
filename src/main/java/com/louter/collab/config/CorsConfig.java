@@ -16,7 +16,10 @@ public class CorsConfig {
                         .allowedOriginPatterns(
                                 "http://localhost:*",
                                 "http://127.0.0.1:*",
-                                "http://app.teamcollab.site:*"
+                                "http://app.teamcollab.site:*",
+                                "https://localhost:*",
+                                "https://127.0.0.1:*",
+                                "https://app.teamcollab.site:*"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")

@@ -17,17 +17,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/teams")
 public class ChatController {
 
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/teams/{teamId}/chat/{roomId}/send")
+    @MessageMapping("/{teamId}/chat/{roomId}/send")
     public void sendMessage(@DestinationVariable Long teamId,
                             @DestinationVariable Long roomId,
                             @Payload ChatMessageRequest chatMessageRequest,
@@ -37,7 +39,7 @@ public class ChatController {
         messagingTemplate.convertAndSend("/sub/teams/" + teamId + "/chat/" + roomId, response);
     }
 
-    @MessageMapping("/teams/{teamId}/chat/{roomId}/read")
+    @MessageMapping("/{teamId}/chat/{roomId}/read")
     public void markAsRead(@DestinationVariable Long teamId,
                            @DestinationVariable Long roomId,
                            @Payload MarkAsReadRequest markAsReadRequest,
@@ -46,12 +48,12 @@ public class ChatController {
         chatService.markMessageAsRead(roomId, markAsReadRequest.getMessageId(), userId);
     }
 
-    @GetMapping("/teams/{teamId}/chat/rooms")
+    @GetMapping("/{teamId}/chat/rooms")
     public ResponseEntity<List<ChatRoomResponse>> getChatRooms(@PathVariable Long teamId) {
         return ResponseEntity.ok(chatService.getChatRoomsByTeam(teamId));
     }
 
-    @GetMapping("/teams/{teamId}/chat/{roomId}/messages")
+    @GetMapping("/{teamId}/chat/{roomId}/messages")
     public ResponseEntity<List<ChatMessageResponse>> getChatMessages(
             @PathVariable Long teamId,
             @PathVariable Long roomId,
