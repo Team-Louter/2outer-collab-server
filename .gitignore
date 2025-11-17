@@ -41,6 +41,8 @@ application.yml
 application-*.yml
 application.properties
 application-*.properties
+.env
+.env.*
 
 # Docker 설정
 docker-compose.yml
