@@ -9,5 +9,4 @@ class CollabApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
