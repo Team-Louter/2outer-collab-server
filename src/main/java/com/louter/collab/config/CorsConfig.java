@@ -1,4 +1,4 @@
-package com.but.rebloom.config;
+package com.louter.collab.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
