@@ -10,6 +10,10 @@ import org.springframework.context.annotation.Configuration;
                 @Server(
                         url = "https://teamcollab.site", // 운영 환경 배포용 URL
                         description = "Production Server"
+                ),
+                @Server(
+                        url = "https://localhost:5173",
+                        description = "Local Server"
                 )
         }
 )
