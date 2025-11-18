@@ -15,10 +15,16 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
+                                // HTTP localhost
                                 "http://localhost:5500",
                                 "http://localhost:3000",
                                 "http://localhost:5173",
-                                "http://localhost:8080"
+                                "http://localhost:8080",
+                                // HTTPS localhost
+                                "https://localhost:5500",
+                                "https://localhost:3000",
+                                "https://localhost:5173",
+                                "https://localhost:8080"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization")
