@@ -24,7 +24,10 @@ public class CorsConfig {
                                 "https://localhost:5500",
                                 "https://localhost:3000",
                                 "https://localhost:5173",
-                                "https://localhost:8080"
+                                "https://localhost:8080",
+                                // url
+                                "https://teamcollab.site",
+                                "http://teamcollab.site"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization")
