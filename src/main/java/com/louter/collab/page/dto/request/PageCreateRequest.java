@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class PageCreateRequest {
-    private String title;
 
+    private String title;
 
 }
