@@ -116,7 +116,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public TeamJoinRequest requestJoinTeam(@NonNull Long userId, @NonNull Long teamId) {
+    public TeamJoinRequest requestJoinTeam(@NonNull Long userId, @NonNull Long teamId, String workUrl) {
         // 유저 존재 확인
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
@@ -141,6 +141,7 @@ public class TeamServiceImpl implements TeamService {
                 .user(user)
                 .team(team)
                 .status(TeamJoinRequest.RequestStatus.PENDING)
+                .workUrl(workUrl)
                 .build();
 
         return teamJoinRequestRepository.save(joinRequest);
