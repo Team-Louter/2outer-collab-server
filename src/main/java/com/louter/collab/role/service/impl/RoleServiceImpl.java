@@ -158,7 +158,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
-    public void addPermission(Long userId, Long teamId, Long roleId, Permission permission) {
+    public Role updateRole(Long userId, Long teamId, Long roleId, String roleName, String description, Set<Permission> permissions) {
         // TEAM_SETTINGS 권한 확인
         if (!hasPermission(userId, teamId, Permission.TEAM_SETTINGS)) {
             throw new IllegalArgumentException("권한을 관리할 권한이 없습니다.");
@@ -173,39 +173,32 @@ public class RoleServiceImpl implements RoleService {
             throw new IllegalArgumentException("해당 팀의 권한이 아닙니다.");
         }
 
-        // 이미 퍼미션이 있는지 확인
-        if (rolePermissionRepository.existsByRole_RoleIdAndId_Permission(roleId, permission)) {
-            throw new IllegalArgumentException("이미 존재하는 퍼미션입니다.");
+        // 기본 권한(멤버, 관리자) 수정 불가
+        if (role.getRoleName().equals("멤버") || role.getRoleName().equals("관리자")) {
+            throw new IllegalArgumentException("기본 권한은 수정할 수 없습니다.");
         }
 
-        // 퍼미션 추가
-        addPermissionToRole(role, permission);
-    }
-
-    @Override
-    @Transactional
-    public void removePermission(Long userId, Long teamId, Long roleId, Permission permission) {
-        // TEAM_SETTINGS 권한 확인
-        if (!hasPermission(userId, teamId, Permission.TEAM_SETTINGS)) {
-            throw new IllegalArgumentException("권한을 관리할 권한이 없습니다.");
+        // 이름 변경 시 중복 확인
+        if (!role.getRoleName().equals(roleName) && roleRepository.existsByTeam_TeamIdAndRoleName(teamId, roleName)) {
+            throw new IllegalArgumentException("이미 존재하는 권한 이름입니다.");
         }
 
-        // 권한 존재 확인
-        Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> new IllegalArgumentException("권한을 찾을 수 없습니다."));
+        // 정보 업데이트
+        role.setRoleName(roleName);
+        role.setDescription(description);
+        roleRepository.save(role);
 
-        // 해당 팀의 권한인지 확인
-        if (!role.getTeam().getTeamId().equals(teamId)) {
-            throw new IllegalArgumentException("해당 팀의 권한이 아닙니다.");
+        // 기존 퍼미션 삭제
+        rolePermissionRepository.deleteByRole_RoleId(roleId);
+
+        // 새 퍼미션 추가
+        if (permissions != null && !permissions.isEmpty()) {
+            for (Permission permission : permissions) {
+                addPermissionToRole(role, permission);
+            }
         }
-
-        // 퍼미션 존재 확인
-        RolePermissionId rolePermissionId = new RolePermissionId(roleId, permission);
-        RolePermission rolePermission = rolePermissionRepository.findById(rolePermissionId)
-                .orElseThrow(() -> new IllegalArgumentException("퍼미션을 찾을 수 없습니다."));
-
-        // 퍼미션 삭제
-        rolePermissionRepository.delete(rolePermission);
+        
+        return role;
     }
 
     @Override

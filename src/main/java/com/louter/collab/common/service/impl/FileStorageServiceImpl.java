@@ -41,6 +41,12 @@ public class FileStorageServiceImpl implements FileStorageService {
                 throw new RuntimeException("Sorry! Filename contains invalid path sequence " + fileName);
             }
 
+            // Basic file type validation (Block dangerous extensions)
+            String fileExtension = StringUtils.getFilenameExtension(fileName);
+            if (fileExtension != null && isDangerousExtension(fileExtension)) {
+                throw new RuntimeException("Sorry! File type not allowed: " + fileExtension);
+            }
+
             String newFileName = UUID.randomUUID().toString() + "_" + fileName;
             Path targetLocation = this.fileStorageLocation.resolve(newFileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
@@ -49,5 +55,11 @@ public class FileStorageServiceImpl implements FileStorageService {
         } catch (IOException ex) {
             throw new RuntimeException("Could not store file " + fileName + ". Please try again!", ex);
         }
+    }
+
+    private boolean isDangerousExtension(String extension) {
+        String ext = extension.toLowerCase();
+        return ext.equals("exe") || ext.equals("sh") || ext.equals("bat") || ext.equals("cmd") 
+                || ext.equals("jsp") || ext.equals("php") || ext.equals("js") || ext.equals("html");
     }
 }
