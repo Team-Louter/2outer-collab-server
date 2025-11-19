@@ -47,6 +47,7 @@ public class RoleServiceImpl implements RoleService {
         Role memberRole = Role.builder()
                 .team(team)
                 .roleName("멤버")
+                .description("기본 멤버 권한입니다.")
                 .permissions(new HashSet<>())
                 .build();
         memberRole = roleRepository.save(memberRole);
@@ -73,6 +74,7 @@ public class RoleServiceImpl implements RoleService {
         Role adminRole = Role.builder()
                 .team(team)
                 .roleName("관리자")
+                .description("팀 관리자 권한입니다.")
                 .permissions(new HashSet<>())
                 .build();
         adminRole = roleRepository.save(adminRole);
@@ -80,15 +82,15 @@ public class RoleServiceImpl implements RoleService {
         // 관리자 퍼미션 추가 (모든 권한)
         addPermissionToRole(adminRole, Permission.TEAM_SETTINGS);
         addPermissionToRole(adminRole, Permission.ANNOUNCEMENT);
-        addPermissionToRole(adminRole, Permission.MEETING_SCHEDULE);
-        addPermissionToRole(adminRole, Permission.TEAM_CHAT);
+        addPermissionToRole(adminRole, Permission.SCHEDULE);
+        addPermissionToRole(adminRole, Permission.MEETING_MINUTES);
 
         return adminRole;
     }
 
     @Override
     @Transactional
-    public Role createCustomRole(Long userId, Long teamId, String roleName, Set<Permission> permissions) {
+    public Role createCustomRole(Long userId, Long teamId, String roleName, String description, Set<Permission> permissions) {
         // TEAM_SETTINGS 권한 확인 (권한 관리)
         if (!hasPermission(userId, teamId, Permission.TEAM_SETTINGS)) {
             throw new IllegalArgumentException("권한을 관리할 권한이 없습니다.");
@@ -107,6 +109,7 @@ public class RoleServiceImpl implements RoleService {
         Role customRole = Role.builder()
                 .team(team)
                 .roleName(roleName)
+                .description(description)
                 .permissions(new HashSet<>())
                 .build();
         customRole = roleRepository.save(customRole);
