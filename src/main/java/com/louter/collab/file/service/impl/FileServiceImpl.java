@@ -1,13 +1,16 @@
-package com.louter.collab.common.service.impl;
+package com.louter.collab.file.service.impl;
 
 import com.louter.collab.common.properties.FileStorageProperties;
-import com.louter.collab.common.service.FileStorageService;
+import com.louter.collab.file.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,12 +19,12 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Service
-public class FileStorageServiceImpl implements FileStorageService {
+public class FileServiceImpl implements FileService {
 
     private final Path fileStorageLocation;
 
     @Autowired
-    public FileStorageServiceImpl(FileStorageProperties fileStorageProperties) {
+    public FileServiceImpl(FileStorageProperties fileStorageProperties) {
         this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir())
                 .toAbsolutePath().normalize();
 
@@ -54,6 +57,22 @@ public class FileStorageServiceImpl implements FileStorageService {
             return newFileName;
         } catch (IOException ex) {
             throw new RuntimeException("Could not store file " + fileName + ". Please try again!", ex);
+        }
+    }
+
+    @Override
+    public Resource loadFileAsResource(String fileName) {
+        try {
+            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            java.net.URI uri = filePath.toUri();
+            Resource resource = new UrlResource(uri);
+            if(resource.exists()) {
+                return resource;
+            } else {
+                throw new RuntimeException("File not found " + fileName);
+            }
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException("File not found " + fileName, ex);
         }
     }
 
