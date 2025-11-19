@@ -21,7 +21,7 @@ public interface RoleService {
     /**
      * 커스텀 권한 생성
      */
-    Role createCustomRole(Long userId, Long teamId, String roleName, Set<Permission> permissions);
+    Role createCustomRole(Long userId, Long teamId, String roleName, String description, Set<Permission> permissions);
     
     /**
      * 권한 삭제
