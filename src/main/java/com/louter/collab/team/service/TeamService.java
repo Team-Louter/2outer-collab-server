@@ -20,7 +20,7 @@ public interface TeamService {
     /**
      * 팀 가입 신청
      */
-    TeamJoinRequest requestJoinTeam(Long userId, Long teamId);
+    TeamJoinRequest requestJoinTeam(Long userId, Long teamId, String workUrl);
     
     /**
      * 팀 가입 신청 승인/거절 (관리자만 가능)

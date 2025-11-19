@@ -33,6 +33,9 @@ public class TeamJoinRequest {
     @Column(name = "status", nullable = false, length = 20)
     private RequestStatus status;
 
+    @Column(name = "work_url")
+    private String workUrl;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
