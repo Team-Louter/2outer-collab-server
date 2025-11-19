@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(
         servers = {
                 @Server(
-                        url = "https://teamcollab.site", // 운영 환경 배포용 URL
+                        url = "https://api.teamcollab.site", // 운영 환경 배포용 URL
                         description = "Production Server"
                 ),
                 @Server(
