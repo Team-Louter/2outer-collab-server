@@ -1,11 +1,11 @@
 package com.louter.collab.domain.schedule.controller;
 
 import com.louter.collab.global.common.exception.ScheduleNotFoundException;
-import com.louter.collab.domain.schedule.domain.Schedule;
+import com.louter.collab.domain.schedule.entity.Schedule;
 import com.louter.collab.domain.schedule.dto.request.ScheduleRequest;
 import com.louter.collab.domain.schedule.dto.response.ScheduleResponse;
 import com.louter.collab.domain.schedule.repository.ScheduleRepository;
-import com.louter.collab.domain.team.domain.Team;
+import com.louter.collab.domain.team.entity.Team;
 import com.louter.collab.domain.team.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

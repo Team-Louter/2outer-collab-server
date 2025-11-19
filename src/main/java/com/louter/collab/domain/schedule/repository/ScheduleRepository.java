@@ -1,7 +1,7 @@
 package com.louter.collab.domain.schedule.repository;
 
-import com.louter.collab.domain.schedule.domain.Schedule;
-import com.louter.collab.domain.team.domain.Team;
+import com.louter.collab.domain.schedule.entity.Schedule;
+import com.louter.collab.domain.team.entity.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

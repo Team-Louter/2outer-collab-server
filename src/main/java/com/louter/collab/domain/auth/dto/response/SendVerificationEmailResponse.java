@@ -1,6 +1,6 @@
 package com.louter.collab.domain.auth.dto.response;
 
-import com.louter.collab.domain.auth.domain.User;
+import com.louter.collab.domain.auth.entity.User;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;

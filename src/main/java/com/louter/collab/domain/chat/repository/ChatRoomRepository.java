@@ -1,0 +1,10 @@
+package com.louter.collab.domain.chat.repository;
+
+import com.louter.collab.domain.chat.entity.ChatRoom;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
+    List<ChatRoom> findByTeam_TeamId(Long teamId);
+}

@@ -1,15 +1,15 @@
 package com.louter.collab.domain.role.service.impl;
 
 import com.louter.collab.global.common.exception.IllegalArgumentException;
-import com.louter.collab.domain.role.domain.Permission;
-import com.louter.collab.domain.role.domain.Role;
-import com.louter.collab.domain.role.domain.RolePermission;
-import com.louter.collab.domain.role.domain.RolePermissionId;
+import com.louter.collab.domain.role.entity.Permission;
+import com.louter.collab.domain.role.entity.Role;
+import com.louter.collab.domain.role.entity.RolePermission;
+import com.louter.collab.domain.role.entity.RolePermissionId;
 import com.louter.collab.domain.role.repository.RolePermissionRepository;
 import com.louter.collab.domain.role.repository.RoleRepository;
 import com.louter.collab.domain.role.service.RoleService;
-import com.louter.collab.domain.team.domain.Team;
-import com.louter.collab.domain.team.domain.UserTeam;
+import com.louter.collab.domain.team.entity.Team;
+import com.louter.collab.domain.team.entity.UserTeam;
 import com.louter.collab.domain.team.repository.TeamRepository;
 import com.louter.collab.domain.team.repository.UserTeamRepository;
 import lombok.RequiredArgsConstructor;

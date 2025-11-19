@@ -1,8 +1,8 @@
 package com.louter.collab.domain.team.service;
 
-import com.louter.collab.domain.team.domain.UserTeam;
-import com.louter.collab.domain.team.domain.Team;
-import com.louter.collab.domain.team.domain.TeamJoinRequest;
+import com.louter.collab.domain.team.entity.UserTeam;
+import com.louter.collab.domain.team.entity.Team;
+import com.louter.collab.domain.team.entity.TeamJoinRequest;
 
 import java.util.List;
 

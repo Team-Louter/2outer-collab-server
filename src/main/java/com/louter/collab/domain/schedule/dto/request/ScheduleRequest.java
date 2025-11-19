@@ -1,6 +1,6 @@
 package com.louter.collab.domain.schedule.dto.request;
 
-import com.louter.collab.domain.schedule.domain.Color;
+import com.louter.collab.domain.schedule.entity.Color;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;

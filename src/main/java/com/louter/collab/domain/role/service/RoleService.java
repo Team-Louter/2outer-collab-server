@@ -1,7 +1,7 @@
 package com.louter.collab.domain.role.service;
 
-import com.louter.collab.domain.role.domain.Permission;
-import com.louter.collab.domain.role.domain.Role;
+import com.louter.collab.domain.role.entity.Permission;
+import com.louter.collab.domain.role.entity.Role;
 
 import java.util.List;
 import java.util.Set;

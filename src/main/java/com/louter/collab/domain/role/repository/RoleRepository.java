@@ -1,6 +1,6 @@
 package com.louter.collab.domain.role.repository;
 
-import com.louter.collab.domain.role.domain.Role;
+import com.louter.collab.domain.role.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

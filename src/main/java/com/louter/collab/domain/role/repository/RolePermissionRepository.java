@@ -1,8 +1,8 @@
 package com.louter.collab.domain.role.repository;
 
-import com.louter.collab.domain.role.domain.Permission;
-import com.louter.collab.domain.role.domain.RolePermission;
-import com.louter.collab.domain.role.domain.RolePermissionId;
+import com.louter.collab.domain.role.entity.Permission;
+import com.louter.collab.domain.role.entity.RolePermission;
+import com.louter.collab.domain.role.entity.RolePermissionId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

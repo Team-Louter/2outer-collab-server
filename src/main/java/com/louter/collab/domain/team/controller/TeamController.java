@@ -1,7 +1,7 @@
 package com.louter.collab.domain.team.controller;
 
 import com.louter.collab.domain.auth.jwt.JwtTokenProvider;
-import com.louter.collab.domain.team.domain.Team;
+import com.louter.collab.domain.team.entity.Team;
 import com.louter.collab.domain.team.dto.request.*;
 import com.louter.collab.domain.team.dto.response.TeamJoinRequestResponse;
 import com.louter.collab.domain.team.dto.response.TeamMemberResponse;

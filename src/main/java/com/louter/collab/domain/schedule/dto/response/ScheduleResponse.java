@@ -1,7 +1,7 @@
 package com.louter.collab.domain.schedule.dto.response;
 
-import com.louter.collab.domain.schedule.domain.Color;
-import com.louter.collab.domain.schedule.domain.Schedule;
+import com.louter.collab.domain.schedule.entity.Color;
+import com.louter.collab.domain.schedule.entity.Schedule;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

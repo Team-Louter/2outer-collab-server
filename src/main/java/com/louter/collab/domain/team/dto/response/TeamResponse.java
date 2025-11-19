@@ -1,6 +1,6 @@
 package com.louter.collab.domain.team.dto.response;
 
-import com.louter.collab.domain.team.domain.Team;
+import com.louter.collab.domain.team.entity.Team;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

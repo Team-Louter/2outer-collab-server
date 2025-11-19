@@ -1,6 +1,6 @@
 package com.louter.collab.domain.auth.service.impl;
 
-import com.louter.collab.domain.auth.domain.User;
+import com.louter.collab.domain.auth.entity.User;
 import com.louter.collab.domain.auth.dto.request.LoginRequest;
 import com.louter.collab.domain.auth.dto.request.SignupRequest;
 import com.louter.collab.domain.auth.jwt.JwtAuthenticationFilter;

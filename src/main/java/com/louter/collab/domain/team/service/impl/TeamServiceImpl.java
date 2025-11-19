@@ -1,18 +1,18 @@
 package com.louter.collab.domain.team.service.impl;
 
-import com.louter.collab.domain.auth.domain.User;
+import com.louter.collab.domain.auth.entity.User;
 import com.louter.collab.domain.auth.repository.UserRepository;
-import com.louter.collab.chat.domain.ChatRoom;
-import com.louter.collab.chat.repository.ChatRoomRepository;
+import com.louter.collab.domain.chat.entity.ChatRoom;
+import com.louter.collab.domain.chat.repository.ChatRoomRepository;
 import com.louter.collab.global.common.exception.IllegalArgumentException;
 import com.louter.collab.global.common.exception.UserNotFoundException;
-import com.louter.collab.domain.role.domain.Permission;
-import com.louter.collab.domain.role.domain.Role;
+import com.louter.collab.domain.role.entity.Permission;
+import com.louter.collab.domain.role.entity.Role;
 import com.louter.collab.domain.role.service.RoleService;
-import com.louter.collab.domain.team.domain.Team;
-import com.louter.collab.domain.team.domain.TeamJoinRequest;
-import com.louter.collab.domain.team.domain.UserTeam;
-import com.louter.collab.domain.team.domain.UserTeamId;
+import com.louter.collab.domain.team.entity.Team;
+import com.louter.collab.domain.team.entity.TeamJoinRequest;
+import com.louter.collab.domain.team.entity.UserTeam;
+import com.louter.collab.domain.team.entity.UserTeamId;
 import com.louter.collab.domain.team.repository.TeamJoinRequestRepository;
 import com.louter.collab.domain.team.repository.TeamRepository;
 import com.louter.collab.domain.team.repository.UserTeamRepository;

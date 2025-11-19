@@ -1,6 +1,6 @@
 package com.louter.collab.domain.team.repository;
 
-import com.louter.collab.domain.team.domain.TeamJoinRequest;
+import com.louter.collab.domain.team.entity.TeamJoinRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

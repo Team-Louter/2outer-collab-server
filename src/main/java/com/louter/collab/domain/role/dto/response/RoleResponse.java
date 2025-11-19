@@ -1,8 +1,8 @@
 package com.louter.collab.domain.role.dto.response;
 
-import com.louter.collab.domain.role.domain.Permission;
-import com.louter.collab.domain.role.domain.Role;
-import com.louter.collab.domain.role.domain.RolePermission;
+import com.louter.collab.domain.role.entity.Permission;
+import com.louter.collab.domain.role.entity.Role;
+import com.louter.collab.domain.role.entity.RolePermission;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

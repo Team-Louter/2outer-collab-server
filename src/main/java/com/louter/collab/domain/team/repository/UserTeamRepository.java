@@ -1,7 +1,7 @@
 package com.louter.collab.domain.team.repository;
 
-import com.louter.collab.domain.team.domain.UserTeam;
-import com.louter.collab.domain.team.domain.UserTeamId;
+import com.louter.collab.domain.team.entity.UserTeam;
+import com.louter.collab.domain.team.entity.UserTeamId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

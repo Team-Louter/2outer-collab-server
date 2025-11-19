@@ -1,6 +1,6 @@
 package com.louter.collab.domain.team.dto.response;
 
-import com.louter.collab.domain.team.domain.TeamJoinRequest;
+import com.louter.collab.domain.team.entity.TeamJoinRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

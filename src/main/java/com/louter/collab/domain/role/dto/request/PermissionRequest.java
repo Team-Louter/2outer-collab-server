@@ -1,6 +1,6 @@
 package com.louter.collab.domain.role.dto.request;
 
-import com.louter.collab.domain.role.domain.Permission;
+import com.louter.collab.domain.role.entity.Permission;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
