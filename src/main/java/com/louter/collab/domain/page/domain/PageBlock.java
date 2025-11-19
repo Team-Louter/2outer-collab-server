@@ -1,7 +1,10 @@
-package com.louter.collab.domain.page.domain;
+package com.louter.collab.page.domain;
 
+import com.louter.collab.auth.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -19,6 +22,14 @@ public class PageBlock {
     @Column(name = "block_id", nullable = false)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "page_id",nullable = false)
+    private Page page;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_block_id")
+    private PageBlock pageBlock;
+
     @Column(name = "content", nullable = false)
     private String content;
 
@@ -28,9 +39,16 @@ public class PageBlock {
     @Column(name = "order_index", nullable = false)
     private Long orderIndex;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
+
 }
