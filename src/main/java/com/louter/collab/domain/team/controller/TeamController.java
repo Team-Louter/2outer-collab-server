@@ -1,7 +1,6 @@
 package com.louter.collab.domain.team.controller;
 
 import com.louter.collab.domain.auth.jwt.JwtTokenProvider;
-import com.louter.collab.common.service.FileStorageService;
 import com.louter.collab.domain.team.domain.Team;
 import com.louter.collab.domain.team.dto.request.*;
 import com.louter.collab.domain.team.dto.response.TeamJoinRequestResponse;
@@ -10,11 +9,11 @@ import com.louter.collab.domain.team.dto.response.TeamResponse;
 import com.louter.collab.domain.team.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 
 import java.util.List;
 import java.util.Map;
@@ -26,42 +25,22 @@ public class TeamController {
 
     private final TeamService teamService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final FileStorageService fileStorageService;
 
     // 현재 로그인한 사용자 ID 가져오기 (토큰 기반, 불필요한 DB 조회 제거)
     private Long getCurrentUserId() {
         return jwtTokenProvider.getCurrentUserId();
     }
 
-    private String uploadFile(MultipartFile file) {
-        String fileName = fileStorageService.storeFile(file);
-        return ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/files/download/")
-                .path(fileName)
-                .toUriString();
-    }
+
 
     // 팀 생성
-    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<TeamResponse> createTeam(
-            @RequestPart("request") TeamCreateRequest request,
-            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
-            @RequestPart(value = "bannerImage", required = false) MultipartFile bannerImage) {
+    @PostMapping
+    public ResponseEntity<TeamResponse> createTeam(@RequestBody TeamCreateRequest request) {
         
         Long userId = getCurrentUserId();
         
-        String profilePictureUrl = request.getProfilePicture();
-        if (profileImage != null && !profileImage.isEmpty()) {
-            profilePictureUrl = uploadFile(profileImage);
-        }
-        
-        String bannerPictureUrl = request.getBannerPicture();
-        if (bannerImage != null && !bannerImage.isEmpty()) {
-            bannerPictureUrl = uploadFile(bannerImage);
-        }
-
         Team team = teamService.createTeam(userId, request.getTeamName(), 
-                profilePictureUrl, bannerPictureUrl, request.getIntro());
+                request.getProfilePicture(), request.getBannerPicture(), request.getIntro());
         List<Long> chatRoomIds = teamService.getChatRoomIds(team.getTeamId());
         return ResponseEntity.ok(TeamResponse.from(team, chatRoomIds));
     }
@@ -75,27 +54,15 @@ public class TeamController {
     }
 
     // 팀 수정
-    @PutMapping(value = "/{teamId}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PutMapping("/{teamId}")
     public ResponseEntity<TeamResponse> updateTeam(
             @PathVariable Long teamId,
-            @RequestPart("request") TeamUpdateRequest request,
-            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
-            @RequestPart(value = "bannerImage", required = false) MultipartFile bannerImage) {
+            @RequestBody TeamUpdateRequest request) {
         
         Long userId = getCurrentUserId();
         
-        String profilePictureUrl = request.getProfilePicture();
-        if (profileImage != null && !profileImage.isEmpty()) {
-            profilePictureUrl = uploadFile(profileImage);
-        }
-        
-        String bannerPictureUrl = request.getBannerPicture();
-        if (bannerImage != null && !bannerImage.isEmpty()) {
-            bannerPictureUrl = uploadFile(bannerImage);
-        }
-
         Team team = teamService.updateTeam(userId, teamId, request.getTeamName(), 
-                profilePictureUrl, bannerPictureUrl, request.getIntro());
+                request.getProfilePicture(), request.getBannerPicture(), request.getIntro());
         List<Long> chatRoomIds = teamService.getChatRoomIds(teamId);
         return ResponseEntity.ok(TeamResponse.from(team, chatRoomIds));
     }
