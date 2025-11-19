@@ -31,9 +31,6 @@ public class Role {
     @Column(name = "role_name", nullable = false, length = 255)
     private String roleName;
 
-    @Column(name = "description", length = 500)
-    private String description;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
