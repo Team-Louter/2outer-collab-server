@@ -21,6 +21,7 @@ public class RoleResponse {
     private Long roleId;
     private Long teamId;
     private String roleName;
+    private String description;
     private Set<Permission> permissions;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -30,6 +31,7 @@ public class RoleResponse {
                 .roleId(role.getRoleId())
                 .teamId(role.getTeam().getTeamId())
                 .roleName(role.getRoleName())
+                .description(role.getDescription())
                 .permissions(role.getPermissions().stream()
                         .map(RolePermission::getPermission)
                         .collect(Collectors.toSet()))

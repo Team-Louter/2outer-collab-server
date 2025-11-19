@@ -14,4 +14,6 @@ public class TeamJoinRequestDto {
 
     @NotNull
     private Long teamId;
+    
+    private String workUrl;
 }

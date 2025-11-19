@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -23,8 +24,18 @@ public class TeamResponse {
     private String intro;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String teamProfileUrl;
+    private List<Long> chatRoomIds;
 
-    public static TeamResponse from(Team team) {
+    public TeamResponse(Long id, String teamName, String teamDescription, String teamProfileUrl, List<Long> chatRoomIds) {
+        this.teamId = id;
+        this.teamName = teamName;
+        this.intro = teamDescription;
+        this.teamProfileUrl = teamProfileUrl;
+        this.chatRoomIds = chatRoomIds;
+    }
+
+    public static TeamResponse from(Team team, List<Long> chatRoomIds) {
         return TeamResponse.builder()
                 .teamId(team.getTeamId())
                 .teamName(team.getTeamName())
@@ -35,6 +46,7 @@ public class TeamResponse {
                 .intro(team.getIntro())
                 .createdAt(team.getCreatedAt())
                 .updatedAt(team.getUpdatedAt())
+                .chatRoomIds(chatRoomIds)
                 .build();
     }
 }

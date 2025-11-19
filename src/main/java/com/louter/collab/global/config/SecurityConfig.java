@@ -17,7 +17,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final JwtFilter jwtFilter;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -26,18 +28,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> {}) // Spring MVC CorsConfig 참조
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/favicon.ico").permitAll()
-                        // 기본 경로
-                        .requestMatchers("/", "/auth/**").permitAll()
-                        // 스웨거
+                        .requestMatchers("/", "/auth/**", "/email/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs").permitAll()
-                        // 임시: 팀/권한 API 테스트용 (JWT 구현 후 제거)
-                        .requestMatchers("/teams/**").permitAll()
-                        .anyRequest().permitAll()  // 임시: 모든 요청 허용
+                        .requestMatchers("/chat.html").permitAll()
+                        .requestMatchers("/ws/**", "/ws-stomp/**").permitAll()
+                        .requestMatchers("/teams/**").authenticated()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -45,7 +47,7 @@ public class SecurityConfig {
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json"); // Content-Type 추가
+                            response.setContentType("application/json");
                             response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Authentication required\"}");
                         })
                 )

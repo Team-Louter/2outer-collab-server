@@ -21,6 +21,7 @@ public class TeamJoinRequestResponse {
     private Long teamId;
     private String teamName;
     private String status;
+    private String workUrl;
     private LocalDateTime createdAt;
     private LocalDateTime processedAt;
     private String processedByName;
@@ -34,6 +35,7 @@ public class TeamJoinRequestResponse {
                 .teamId(request.getTeam().getTeamId())
                 .teamName(request.getTeam().getTeamName())
                 .status(request.getStatus().name())
+                .workUrl(request.getWorkUrl())
                 .createdAt(request.getCreatedAt())
                 .processedAt(request.getProcessedAt())
                 .processedByName(request.getProcessedBy() != null ? 

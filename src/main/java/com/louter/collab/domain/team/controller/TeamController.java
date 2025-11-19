@@ -1,16 +1,20 @@
 package com.louter.collab.domain.team.controller;
 
 import com.louter.collab.domain.auth.jwt.JwtTokenProvider;
+import com.louter.collab.common.service.FileStorageService;
 import com.louter.collab.domain.team.domain.Team;
 import com.louter.collab.domain.team.dto.request.*;
-import com.louter.collab.team.dto.request.*;
 import com.louter.collab.domain.team.dto.response.TeamJoinRequestResponse;
 import com.louter.collab.domain.team.dto.response.TeamMemberResponse;
 import com.louter.collab.domain.team.dto.response.TeamResponse;
 import com.louter.collab.domain.team.service.TeamService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 import java.util.Map;
@@ -22,38 +26,78 @@ public class TeamController {
 
     private final TeamService teamService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final FileStorageService fileStorageService;
 
     // 현재 로그인한 사용자 ID 가져오기 (토큰 기반, 불필요한 DB 조회 제거)
     private Long getCurrentUserId() {
         return jwtTokenProvider.getCurrentUserId();
     }
 
+    private String uploadFile(MultipartFile file) {
+        String fileName = fileStorageService.storeFile(file);
+        return ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/files/download/")
+                .path(fileName)
+                .toUriString();
+    }
+
     // 팀 생성
-    @PostMapping
+    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<TeamResponse> createTeam(
-            @RequestBody TeamCreateRequest request) {
+            @RequestPart("request") TeamCreateRequest request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestPart(value = "bannerImage", required = false) MultipartFile bannerImage) {
+        
         Long userId = getCurrentUserId();
+        
+        String profilePictureUrl = request.getProfilePicture();
+        if (profileImage != null && !profileImage.isEmpty()) {
+            profilePictureUrl = uploadFile(profileImage);
+        }
+        
+        String bannerPictureUrl = request.getBannerPicture();
+        if (bannerImage != null && !bannerImage.isEmpty()) {
+            bannerPictureUrl = uploadFile(bannerImage);
+        }
+
         Team team = teamService.createTeam(userId, request.getTeamName(), 
-                request.getProfilePicture(), request.getBannerPicture(), request.getIntro());
-        return ResponseEntity.ok(TeamResponse.from(team));
+                profilePictureUrl, bannerPictureUrl, request.getIntro());
+        List<Long> chatRoomIds = teamService.getChatRoomIds(team.getTeamId());
+        return ResponseEntity.ok(TeamResponse.from(team, chatRoomIds));
     }
 
     // 팀 조회
     @GetMapping("/{teamId}")
     public ResponseEntity<TeamResponse> getTeam(@PathVariable Long teamId) {
         Team team = teamService.getTeam(teamId);
-        return ResponseEntity.ok(TeamResponse.from(team));
+        List<Long> chatRoomIds = teamService.getChatRoomIds(teamId);
+        return ResponseEntity.ok(TeamResponse.from(team, chatRoomIds));
     }
 
     // 팀 수정
-    @PutMapping("/{teamId}")
+    @PutMapping(value = "/{teamId}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<TeamResponse> updateTeam(
             @PathVariable Long teamId,
-            @RequestBody TeamUpdateRequest request) {
+            @RequestPart("request") TeamUpdateRequest request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestPart(value = "bannerImage", required = false) MultipartFile bannerImage) {
+        
         Long userId = getCurrentUserId();
+        
+        String profilePictureUrl = request.getProfilePicture();
+        if (profileImage != null && !profileImage.isEmpty()) {
+            profilePictureUrl = uploadFile(profileImage);
+        }
+        
+        String bannerPictureUrl = request.getBannerPicture();
+        if (bannerImage != null && !bannerImage.isEmpty()) {
+            bannerPictureUrl = uploadFile(bannerImage);
+        }
+
         Team team = teamService.updateTeam(userId, teamId, request.getTeamName(), 
-                request.getProfilePicture(), request.getBannerPicture(), request.getIntro());
-        return ResponseEntity.ok(TeamResponse.from(team));
+                profilePictureUrl, bannerPictureUrl, request.getIntro());
+        List<Long> chatRoomIds = teamService.getChatRoomIds(teamId);
+        return ResponseEntity.ok(TeamResponse.from(team, chatRoomIds));
     }
 
     // 팀 삭제
@@ -69,9 +113,10 @@ public class TeamController {
     // 팀 가입 신청
     @PostMapping("/{teamId}/join-request")
     public ResponseEntity<TeamJoinRequestResponse> requestJoinTeam(
-            @PathVariable Long teamId) {
+            @PathVariable Long teamId,
+            @RequestBody TeamJoinRequestDto request) {
         Long userId = getCurrentUserId();
-        var joinRequest = teamService.requestJoinTeam(userId, teamId);
+        var joinRequest = teamService.requestJoinTeam(userId, teamId, request.getWorkUrl());
         return ResponseEntity.ok(TeamJoinRequestResponse.from(joinRequest));
     }
 
@@ -114,18 +159,22 @@ public class TeamController {
         return ResponseEntity.ok(Map.of("success", true, "message", "팀원이 추방되었습니다."));
     }
 
-    // 내가 속한 팀 목록
+    // 내 팀 목록 조회
     @GetMapping("/my-teams")
-    public ResponseEntity<List<TeamResponse>> getMyTeams() {
+    public ResponseEntity<List<TeamResponse>> getUserTeams() {
         Long userId = getCurrentUserId();
-        var teams = teamService.getUserTeams(userId);
-        var responses = teams.stream()
-                .map(TeamResponse::from)
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<Team> teams = teamService.getUserTeams(userId);
+        List<TeamResponse> responses = teams.stream()
+                .map(team -> {
+                    List<Long> chatRoomIds = teamService.getChatRoomIds(team.getTeamId());
+                    return TeamResponse.from(team, chatRoomIds);
+                })
                 .toList();
         return ResponseEntity.ok(responses);
-    }
-
-    // 팀 멤버 목록
+    }    // 팀 멤버 목록
     @GetMapping("/{teamId}/members")
     public ResponseEntity<List<TeamMemberResponse>> getTeamMembers(@PathVariable Long teamId) {
         var members = teamService.getTeamMembers(teamId);

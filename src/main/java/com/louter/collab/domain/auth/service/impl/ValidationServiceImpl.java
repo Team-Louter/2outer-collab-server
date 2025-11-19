@@ -21,8 +21,14 @@ public class ValidationServiceImpl implements ValidationService {
         String confirmPassword = signupRequest.getConfirmPassword();
         String userEmail = signupRequest.getUserEmail();
 
-        if (userName.isEmpty() || userPassword.isEmpty() || confirmPassword.isEmpty() || userEmail.isEmpty()) {
-            throw new IllegalArgumentException("빈 값 존재");
+        if (userName.isEmpty()){
+            throw new IllegalArgumentException("닉네임을 입력해주세요");
+        } if(userPassword.isEmpty()){
+            throw new IllegalArgumentException("비밀번호를 입력해주세요");
+        } if(confirmPassword.isEmpty()){
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
+        } if(userEmail.isEmpty()){
+            throw new IllegalArgumentException("이메일을 입력해주세요");
         }
     }
 
@@ -31,40 +37,42 @@ public class ValidationServiceImpl implements ValidationService {
 
         String userEmail = loginRequest.getUserEmail();
         String userPassword = loginRequest.getUserPassword();
-        if (userEmail.isEmpty() || userPassword.isEmpty()) {
-            throw new IllegalArgumentException("빈 값 존재");
+        if (userEmail.isEmpty()){
+            throw new IllegalArgumentException("이메일을 입력해주세요");
+        } if (userPassword.isEmpty()) {
+            throw new IllegalArgumentException("비밀번호를 입력해주세요");
         }
     }
 
     @Override
     public void checkUserName(String userName) {
         if (userName.length() < 2 || userName.length() > 20) {
-            throw new IllegalArgumentException("길이가 잘못됨");
+            throw new IllegalArgumentException("닉네임 길이가 잘못되었습니다");
         }
         if (!userName.matches("^[a-zA-Z0-9]+$")) {
-            throw new IllegalArgumentException("영어, 숫자 이외의 글자");
+            throw new IllegalArgumentException("닉네임에 영어, 숫자만 사용해주세요");
         }
         if (userName.matches(".*(.)\\1{2,}.*")) {
-            throw new IllegalArgumentException("3글자 이상 연속");
+            throw new IllegalArgumentException("닉네임은 같은 문자를 3번 이상 연속해서 사용할 수 없습니다.");
         }
         if (!userName.matches("^(?=.*[A-Za-z]).+$")) {
-            throw new IllegalArgumentException("영어, 숫자 포함 안 됨");
+            throw new IllegalArgumentException("닉네임에 영어, 숫자를 포함해주세요");
         }
     }
 
     @Override
     public void checkPassword(String password, String confirmPassword) {
         if (password.length() < 8 || password.length() > 20) {
-            throw new IllegalArgumentException("길이가 잘못됨");
+            throw new IllegalArgumentException("비밀번호 길이가 잘못되었습니다");
         }
         if (!password.matches("^[A-Za-z0-9@$!%*?&]+$")) {
-            throw new IllegalArgumentException("영어, 숫자, 특수문자 이외의 글자");
+            throw new IllegalArgumentException("비밀번호에 영어, 숫자, 특수문자만 사용해주세요");
         }
         if (password.matches(".*(.)\\1{2,}.*")) {
-            throw new IllegalArgumentException("3글자 이상 연속");
+            throw new IllegalArgumentException("비밀번호는 같은 문자를 3번 이상 연속해서 사용할 수 없습니다.");
         }
         if (!password.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&]).+$")) {
-            throw new IllegalArgumentException("영어, 숫자, 특수문자를 포함 안 됨");
+            throw new IllegalArgumentException("비밀번호에 영어, 숫자, 특수문자를 포함해주세요");
         }
         if (!password.equals(confirmPassword)) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
@@ -75,15 +83,14 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public void checkEmail(String email) {
         if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-            throw new IllegalArgumentException("이메일 오류");
+            throw new IllegalArgumentException("잘못된 이메일입니다");
         }
     }
 
     @Override
     public void checkExistAccount(String userName, String userEmail) {
-        if (userRepository.existsByUserName(userName) ||
-                userRepository.existsByUserEmail(userEmail)) {
-            throw new AlreadyUsingIdException("이미 존재함");
+        if (userRepository.existsByUserEmail(userEmail)) {
+            throw new AlreadyUsingIdException("중복된 이메일입니다");
         }
     }
 }

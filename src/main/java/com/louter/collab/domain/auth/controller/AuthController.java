@@ -6,10 +6,13 @@ import com.louter.collab.domain.auth.dto.request.SignupRequest;
 import com.louter.collab.domain.auth.repository.UserRepository;
 import com.louter.collab.domain.auth.service.AuthService;
 import com.louter.collab.domain.auth.service.EmailService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.Map;
 
@@ -31,8 +34,19 @@ public class AuthController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Object> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         String token = authService.login(loginRequest);
+
+        ResponseCookie cookie = ResponseCookie.from("token", token)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(24 * 60 * 60)
+                .sameSite("None")
+                .build();
+
+        response.setHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
+
         return ResponseEntity.ok(Map.of("success", true, "token", token));
     }
 
