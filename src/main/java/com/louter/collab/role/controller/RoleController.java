@@ -42,7 +42,7 @@ public class RoleController {
             @RequestBody RoleCreateRequest request) {
         Long userId = getCurrentUserId();
         var role = roleService.createCustomRole(userId, teamId, 
-                request.getRoleName(), request.getPermissions());
+                request.getRoleName(), request.getDescription(), request.getPermissions());
         return ResponseEntity.ok(RoleResponse.from(role));
     }
 
