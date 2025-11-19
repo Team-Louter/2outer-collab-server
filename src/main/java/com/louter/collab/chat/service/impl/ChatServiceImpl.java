@@ -1,7 +1,7 @@
 package com.louter.collab.chat.service.impl;
 
-import com.louter.collab.auth.domain.User;
-import com.louter.collab.auth.repository.UserRepository;
+import com.louter.collab.domain.auth.domain.User;
+import com.louter.collab.domain.auth.repository.UserRepository;
 import com.louter.collab.chat.domain.ChatMessage;
 import com.louter.collab.chat.domain.ChatMessageFile;
 import com.louter.collab.chat.domain.ChatReader;
@@ -14,11 +14,11 @@ import com.louter.collab.chat.repository.ChatMessageRepository;
 import com.louter.collab.chat.repository.ChatReaderRepository;
 import com.louter.collab.chat.repository.ChatRoomRepository;
 import com.louter.collab.chat.service.ChatService;
-import com.louter.collab.role.domain.Permission;
-import com.louter.collab.role.service.RoleService;
-import com.louter.collab.team.domain.Team;
-import com.louter.collab.team.repository.TeamRepository;
-import com.louter.collab.team.repository.UserTeamRepository;
+import com.louter.collab.domain.role.domain.Permission;
+import com.louter.collab.domain.role.service.RoleService;
+import com.louter.collab.domain.team.domain.Team;
+import com.louter.collab.domain.team.repository.TeamRepository;
+import com.louter.collab.domain.team.repository.UserTeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

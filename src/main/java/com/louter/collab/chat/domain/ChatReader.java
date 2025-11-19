@@ -1,12 +1,11 @@
 package com.louter.collab.chat.domain;
 
-import com.louter.collab.auth.domain.User;
+import com.louter.collab.domain.auth.domain.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;

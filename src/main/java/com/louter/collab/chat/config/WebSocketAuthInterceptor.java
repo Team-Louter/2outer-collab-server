@@ -1,6 +1,6 @@
 package com.louter.collab.chat.config;
 
-import com.louter.collab.auth.jwt.JwtAuthenticationFilter;
+import com.louter.collab.domain.auth.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;

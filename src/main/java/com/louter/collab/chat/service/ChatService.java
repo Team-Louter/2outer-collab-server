@@ -1,6 +1,6 @@
 package com.louter.collab.chat.service;
 
-import com.louter.collab.auth.domain.User;
+import com.louter.collab.domain.auth.domain.User;
 import com.louter.collab.chat.dto.request.ChatMessageRequest;
 import com.louter.collab.chat.dto.response.ChatMessageResponse;
 import com.louter.collab.chat.dto.response.ChatRoomResponse;

@@ -1,6 +1,6 @@
 package com.louter.collab.chat.domain;
 
-import com.louter.collab.auth.domain.User;
+import com.louter.collab.domain.auth.domain.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
