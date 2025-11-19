@@ -1,8 +1,8 @@
 package com.louter.collab.role.controller;
 
 import com.louter.collab.auth.jwt.JwtTokenProvider;
-import com.louter.collab.role.dto.request.PermissionRequest;
 import com.louter.collab.role.dto.request.RoleCreateRequest;
+import com.louter.collab.role.dto.request.RoleUpdateRequest;
 import com.louter.collab.role.dto.response.RoleResponse;
 import com.louter.collab.role.service.RoleService;
 import lombok.RequiredArgsConstructor;
@@ -56,25 +56,15 @@ public class RoleController {
         return ResponseEntity.ok(Map.of("success", true, "message", "권한이 삭제되었습니다."));
     }
 
-    // 권한에 퍼미션 추가
-    @PostMapping("/{roleId}/permissions")
-    public ResponseEntity<?> addPermission(
+    // 권한 수정
+    @PutMapping("/{roleId}")
+    public ResponseEntity<RoleResponse> updateRole(
             @PathVariable Long teamId,
             @PathVariable Long roleId,
-            @RequestBody PermissionRequest request) {
+            @RequestBody RoleUpdateRequest request) {
         Long userId = getCurrentUserId();
-        roleService.addPermission(userId, teamId, roleId, request.getPermission());
-        return ResponseEntity.ok(Map.of("success", true, "message", "퍼미션이 추가되었습니다."));
-    }
-
-    // 권한에서 퍼미션 제거
-    @DeleteMapping("/{roleId}/permissions")
-    public ResponseEntity<?> removePermission(
-            @PathVariable Long teamId,
-            @PathVariable Long roleId,
-            @RequestBody PermissionRequest request) {
-        Long userId = getCurrentUserId();
-        roleService.removePermission(userId, teamId, roleId, request.getPermission());
-        return ResponseEntity.ok(Map.of("success", true, "message", "퍼미션이 제거되었습니다."));
+        var role = roleService.updateRole(userId, teamId, roleId, 
+                request.getRoleName(), request.getDescription(), request.getPermissions());
+        return ResponseEntity.ok(RoleResponse.from(role));
     }
 }

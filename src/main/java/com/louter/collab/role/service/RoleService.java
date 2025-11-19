@@ -29,14 +29,9 @@ public interface RoleService {
     void deleteRole(Long userId, Long teamId, Long roleId);
     
     /**
-     * 권한에 퍼미션 추가
+     * 권한 수정 (이름, 설명, 퍼미션 목록)
      */
-    void addPermission(Long userId, Long teamId, Long roleId, Permission permission);
-    
-    /**
-     * 권한에서 퍼미션 제거
-     */
-    void removePermission(Long userId, Long teamId, Long roleId, Permission permission);
+    Role updateRole(Long userId, Long teamId, Long roleId, String roleName, String description, Set<Permission> permissions);
     
     /**
      * 팀의 모든 권한 조회
