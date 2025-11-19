@@ -1,4 +1,4 @@
-package com.louter.collab.page.domain;
+package com.louter.collab.domain.page.domain;
 
 import jakarta.persistence.*;
 import lombok.*;

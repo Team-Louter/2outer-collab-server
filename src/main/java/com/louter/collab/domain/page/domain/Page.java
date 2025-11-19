@@ -1,4 +1,4 @@
-package com.louter.collab.page.domain;
+package com.louter.collab.domain.page.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,19 +10,22 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "page_changes")
+@Table(name = "pages")
 @Builder
-public class PageChange {
+public class Page {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "change_id", nullable = false)
+    @Column(name = "page_id", nullable = false)
     private Long id;
 
-    @Column(name = "change_content", nullable = false)
-    private String changeContent;
+    @Column(name = "title", nullable = false)
+    private String title;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
 }
