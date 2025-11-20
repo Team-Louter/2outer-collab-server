@@ -11,8 +11,11 @@ import lombok.Setter;
 public class LoginResponse {
     @NotNull
     private Boolean success;
-    @NotNull
-    private String userEmail;
+
     @NotNull
     private String token;
+
+    private Long userId;
+
+    private String userName;
 }

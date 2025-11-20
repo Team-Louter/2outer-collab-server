@@ -1,4 +1,4 @@
-package com.louter.collab.config;
+package com.louter.collab.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

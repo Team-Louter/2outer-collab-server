@@ -66,4 +66,10 @@ public class AuthServiceImpl implements AuthService {
 
         return jwtTokenProvider.generateToken(user.getUserId());
     }
+
+    @Override
+    public User getUser(String userEmail) {
+        return userRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("유저 조회 실패"));
+    }
 }

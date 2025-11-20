@@ -3,6 +3,8 @@ package com.louter.collab.domain.auth.controller;
 import com.louter.collab.domain.auth.dto.request.LoginRequest;
 import com.louter.collab.domain.auth.dto.request.SendVerificationEmailRequest;
 import com.louter.collab.domain.auth.dto.request.SignupRequest;
+import com.louter.collab.domain.auth.dto.response.LoginResponse;
+import com.louter.collab.domain.auth.entity.User;
 import com.louter.collab.domain.auth.repository.UserRepository;
 import com.louter.collab.domain.auth.service.AuthService;
 import com.louter.collab.domain.auth.service.EmailService;
@@ -34,8 +36,15 @@ public class AuthController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         String token = authService.login(loginRequest);
+
+        User user = authService.getUser(loginRequest.getUserEmail());
+
+        System.out.println("=== 디버깅 로그 시작 ===");
+        System.out.println("User ID: " + user.getUserId());
+        System.out.println("User Name: " + user.getUserName());
+        System.out.println("=== 디버깅 로그 끝 ===");
 
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
@@ -47,7 +56,14 @@ public class AuthController {
 
         response.setHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return ResponseEntity.ok(Map.of("success", true, "token", token));
+        LoginResponse loginResponse = LoginResponse.builder()
+                .success(true)
+                .token(token)
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .build();
+
+        return ResponseEntity.ok(loginResponse);
     }
 
     // 이메일 전송
@@ -79,5 +95,4 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증 실패");
         }
     }
-
 }
