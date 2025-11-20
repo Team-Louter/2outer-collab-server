@@ -43,6 +43,7 @@ application.properties
 application-*.properties
 .env
 .env.*
+.DS_Store
 
 # Docker 설정
 docker-compose.yml
