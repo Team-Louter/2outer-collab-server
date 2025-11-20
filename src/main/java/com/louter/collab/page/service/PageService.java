@@ -1,6 +1,5 @@
 package com.louter.collab.page.service;
 
-import com.louter.collab.page.domain.PageBlock;
 import com.louter.collab.page.dto.request.PageBlockEditRequest;
 import com.louter.collab.page.dto.request.PageCreateRequest;
 import com.louter.collab.page.dto.request.PageUpdateRequest;
