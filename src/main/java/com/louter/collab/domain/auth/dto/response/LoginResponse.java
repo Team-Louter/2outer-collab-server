@@ -15,7 +15,9 @@ public class LoginResponse {
     @NotNull
     private String token;
 
+    @NotNull
     private Long userId;
 
+    @NotNull
     private String userName;
 }

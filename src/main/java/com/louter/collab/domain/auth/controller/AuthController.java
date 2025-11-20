@@ -41,11 +41,6 @@ public class AuthController {
 
         User user = authService.getUser(loginRequest.getUserEmail());
 
-        System.out.println("=== 디버깅 로그 시작 ===");
-        System.out.println("User ID: " + user.getUserId());
-        System.out.println("User Name: " + user.getUserName());
-        System.out.println("=== 디버깅 로그 끝 ===");
-
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
                 .secure(true)
