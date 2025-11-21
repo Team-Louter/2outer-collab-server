@@ -29,7 +29,7 @@ public class ProfileResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static ProfileResponse from(Profile profile, String userName, List<String> projects) {
+    public static ProfileResponse of(Profile profile, String userName, List<String> projects) {
         return ProfileResponse.builder()
                 .userId(profile.getUserId())
                 .userName(userName)

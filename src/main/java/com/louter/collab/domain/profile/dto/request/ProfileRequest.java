@@ -12,9 +12,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProfileRequest {
     @NotNull
-    private Long userId;
-
-    @NotNull
     private String profileImageUrl;
 
     @NotNull

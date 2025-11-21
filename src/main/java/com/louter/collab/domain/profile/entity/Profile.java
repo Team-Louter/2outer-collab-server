@@ -27,8 +27,8 @@ public class Profile {
     private User user;
 
     @Column(name = "profile_image_url")
-    @ColumnDefault("http://api.teamcollab.site/api/files/download/02c775b8-2792-44f2-955c-9c08d0ec4d10_defaultProfileImage.png")
-    private String profileImageUrl;
+    @Builder.Default
+    private String profileImageUrl= "http://api.teamcollab.site/api/files/download/02c775b8-2792-44f2-955c-9c08d0ec4d10_defaultProfileImage.png";
 
     @Column(name = "bio")
     private String bio;
