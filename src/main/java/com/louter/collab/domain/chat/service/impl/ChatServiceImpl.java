@@ -14,6 +14,7 @@ import com.louter.collab.domain.chat.repository.ChatMessageRepository;
 import com.louter.collab.domain.chat.repository.ChatReaderRepository;
 import com.louter.collab.domain.chat.repository.ChatRoomRepository;
 import com.louter.collab.domain.chat.service.ChatService;
+import com.louter.collab.global.common.exception.TeamNotFoundException;
 import com.louter.collab.domain.role.entity.Permission;
 import com.louter.collab.domain.role.service.RoleService;
 import com.louter.collab.domain.team.entity.Team;
