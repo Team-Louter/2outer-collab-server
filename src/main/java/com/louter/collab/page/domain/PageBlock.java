@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "page_blocks")
@@ -28,7 +27,7 @@ public class PageBlock {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_block_id")
-    private PageBlock pageBlock;
+    private PageBlock parent;
 
     @Column(name = "content", nullable = false)
     private String content;
@@ -37,7 +36,7 @@ public class PageBlock {
     private String type;
 
     @Column(name = "order_index", nullable = false)
-    private Long orderIndex;
+    private Integer orderIndex;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
@@ -50,5 +49,11 @@ public class PageBlock {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
+
+    public void update(String content, String type, Integer orderIndex) {
+        this.content = content;
+        this.type = type;
+        this.orderIndex = orderIndex;
+    }
 
 }
