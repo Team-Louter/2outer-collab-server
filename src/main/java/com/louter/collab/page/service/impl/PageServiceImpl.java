@@ -2,6 +2,7 @@ package com.louter.collab.page.service.impl;
 
 import com.louter.collab.auth.domain.User;
 import com.louter.collab.auth.repository.UserRepository;
+import com.louter.collab.common.exception.UserNotFoundException;
 import com.louter.collab.page.domain.Page;
 import com.louter.collab.page.dto.request.PageBlockEditRequest;
 import com.louter.collab.page.dto.request.PageCreateRequest;
@@ -43,7 +44,7 @@ public class PageServiceImpl implements PageService {
 
         // user 조회
         User author = userRepository.findByUserId(request.getAuthorId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 작성자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserNotFoundException("해당 작성자를 찾을 수 없습니다."));
 
         Page page = Page.builder()
                 .team(team)
@@ -57,7 +58,13 @@ public class PageServiceImpl implements PageService {
     @Override
     @Transactional
     public PageResponse update(Long pageId, PageUpdateRequest request) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Page page = pageRepository.findById(pageId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회의록을 찾을 수 없습니다."));
+
+        page = Page.builder()
+                .build();
+
+        return PageResponse.from(pageRepository.save(Page));
     }
 
     @Override
