@@ -64,7 +64,7 @@ public class PageServiceImpl implements PageService {
         page = Page.builder()
                 .build();
 
-        return PageResponse.from(pageRepository.save(Page));
+        return PageResponse.from(pageRepository.save(page));
     }
 
     @Override
