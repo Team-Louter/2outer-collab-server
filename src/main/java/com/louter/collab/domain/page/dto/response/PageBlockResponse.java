@@ -1,7 +1,6 @@
-package com.louter.collab.page.dto.response;
+package com.louter.collab.domain.page.dto.response;
 
-import com.louter.collab.page.domain.PageBlock;
-import jakarta.validation.constraints.NotBlank;
+import com.louter.collab.domain.page.entity.PageBlock;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +21,7 @@ public class PageBlockResponse {
     @NotNull
     private String type;
     @NotNull
-    private Long orderIndex;
+    private Integer orderIndex;
     @NotNull
     private LocalDateTime createdAt;
     @NotNull
@@ -34,7 +33,7 @@ public class PageBlockResponse {
         return PageBlockResponse.builder()
                 .id(block.getId())
                 .page(block.getPage().getId())
-                .pageBlock(block.getPageBlock() != null ? block.getPageBlock().getId() : null )
+                .pageBlock(block.getParent() != null ? block.getParent().getId() : null )
                 .content(block.getContent())
                 .type(block.getType())
                 .orderIndex(block.getOrderIndex())
