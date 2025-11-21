@@ -1,10 +1,10 @@
 package com.louter.collab.domain.page.dto.request;
 
 public class PageCreateRequest {
-<<<<<<< HEAD
-=======
+
+    private Long teamId;
+
+    private Long authorId;
 
     private String title;
-
->>>>>>> 7fdca94 (feat : dto 추가)
 }

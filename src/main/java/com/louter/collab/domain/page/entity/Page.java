@@ -1,7 +1,7 @@
-package com.louter.collab.domain.page.domain;
+package com.louter.collab.domain.page.entity;
 
-import com.louter.collab.auth.domain.User;
-import com.louter.collab.team.domain.Team;
+import com.louter.collab.domain.auth.entity.User;
+import com.louter.collab.domain.team.entity.Team;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

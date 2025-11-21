@@ -1,6 +1,6 @@
-package com.louter.collab.page.domain;
+package com.louter.collab.domain.page.entity;
 
-import com.louter.collab.auth.domain.User;
+import com.louter.collab.domain.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -55,5 +55,4 @@ public class PageBlock {
         this.type = type;
         this.orderIndex = orderIndex;
     }
-
 }
