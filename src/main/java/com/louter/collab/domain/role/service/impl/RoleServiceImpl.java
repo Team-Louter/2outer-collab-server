@@ -1,6 +1,8 @@
 package com.louter.collab.domain.role.service.impl;
 
 import com.louter.collab.global.common.exception.IllegalArgumentException;
+import com.louter.collab.global.common.exception.RoleNotFoundException;
+import com.louter.collab.global.common.exception.TeamNotFoundException;
 import com.louter.collab.domain.role.entity.Permission;
 import com.louter.collab.domain.role.entity.Role;
 import com.louter.collab.domain.role.entity.RolePermission;
@@ -35,7 +37,7 @@ public class RoleServiceImpl implements RoleService {
     public Role createDefaultMemberRole(Long teamId) {
         // 팀 존재 확인
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
+                .orElseThrow(() -> new TeamNotFoundException("팀을 찾을 수 없습니다."));
 
         // 이미 멤버 권한이 있는지 확인
         if (roleRepository.existsByTeam_TeamIdAndRoleName(teamId, "멤버")) {
@@ -62,7 +64,7 @@ public class RoleServiceImpl implements RoleService {
     public Role createDefaultAdminRole(Long teamId) {
         // 팀 존재 확인
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
+                .orElseThrow(() -> new TeamNotFoundException("팀을 찾을 수 없습니다."));
 
         // 이미 관리자 권한이 있는지 확인
         if (roleRepository.existsByTeam_TeamIdAndRoleName(teamId, "관리자")) {
@@ -98,7 +100,7 @@ public class RoleServiceImpl implements RoleService {
 
         // 팀 존재 확인
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
+                .orElseThrow(() -> new TeamNotFoundException("팀을 찾을 수 없습니다."));
 
         // 권한 이름 중복 확인
         if (roleRepository.existsByTeam_TeamIdAndRoleName(teamId, roleName)) {
@@ -134,7 +136,7 @@ public class RoleServiceImpl implements RoleService {
 
         // 권한 존재 확인
         Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> new IllegalArgumentException("권한을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RoleNotFoundException("권한을 찾을 수 없습니다."));
 
         // 해당 팀의 권한인지 확인
         if (!role.getTeam().getTeamId().equals(teamId)) {
@@ -166,7 +168,7 @@ public class RoleServiceImpl implements RoleService {
 
         // 권한 존재 확인
         Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> new IllegalArgumentException("권한을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RoleNotFoundException("권한을 찾을 수 없습니다."));
 
         // 해당 팀의 권한인지 확인
         if (!role.getTeam().getTeamId().equals(teamId)) {
@@ -209,7 +211,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role getRole(Long roleId) {
         return roleRepository.findById(roleId)
-                .orElseThrow(() -> new IllegalArgumentException("권한을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RoleNotFoundException("권한을 찾을 수 없습니다."));
     }
 
     @Override
@@ -235,7 +237,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public boolean isTeamCreator(Long userId, Long teamId) {
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new IllegalArgumentException("팀을 찾을 수 없습니다."));
+                .orElseThrow(() -> new TeamNotFoundException("팀을 찾을 수 없습니다."));
         return team.getCreator().getUserId().equals(userId);
     }
 
