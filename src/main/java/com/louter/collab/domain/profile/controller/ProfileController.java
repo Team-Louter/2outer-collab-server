@@ -27,4 +27,11 @@ public class ProfileController {
         ProfileResponse profileResponse = profileService.getProfile(userId);
         return ResponseEntity.ok(profileResponse);
     }
+
+    // 프로필 수정
+    @PutMapping("/{userId}")
+    public ResponseEntity<ProfileResponse> updateProfile(@PathVariable("userId") Long userId, @RequestBody ProfileRequest profileRequest) {
+        ProfileResponse profileResponse = profileService.updateProfile(userId, profileRequest);
+        return ResponseEntity.ok(profileResponse);
+    }
 }

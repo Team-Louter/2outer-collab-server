@@ -34,6 +34,7 @@ public class ProfileServiceImpl implements ProfileService {
             throw new IllegalArgumentException("이미 프로필이 존재합니다.");
         }
 
+        user.setUserName(profileRequest.getUserName());
         Profile profile = Profile.builder()
                 .userId(userId)
                 .user(user)
@@ -65,9 +66,24 @@ public class ProfileServiceImpl implements ProfileService {
         return ProfileResponse.of(profile, user.getUserName(), projects);
     }
 
+    // 프로필 수정
+    @Transactional
     @Override
     public ProfileResponse updateProfile(Long userId, ProfileRequest profileRequest) {
-        return null;
+        User user = userRepository.findById(userId)
+                .orElseThrow(()->new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        Profile profile = profileRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("프로필을 찾을 수 없습니다."));
+
+        user.setUserName(profileRequest.getUserName());
+        profile.setProfileImageUrl(profileRequest.getProfileImageUrl() == null ? "http://api.teamcollab.site/api/files/download/02c775b8-2792-44f2-955c-9c08d0ec4d10_defaultProfileImage.png" : profileRequest.getProfileImageUrl());
+        profile.setBio(profileRequest.getBio());
+
+        List<String> projects = userTeamRepository.findByUser_UserId(userId).stream()
+                .map(userTeam -> userTeam.getTeam().getTeamName())
+                .collect(Collectors.toList());
+        return ProfileResponse.of(profile, user.getUserName(), projects);
     }
 
     @Override
