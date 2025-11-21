@@ -20,4 +20,11 @@ public class ProfileController {
         ProfileResponse profileResponse = profileService.createProfile(userId, profileRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(profileResponse);
     }
+
+    // 프로필 조회
+    @GetMapping("/{userId}")
+    public ResponseEntity<ProfileResponse> getProfile(@PathVariable("userId") Long userId) {
+        ProfileResponse profileResponse = profileService.getProfile(userId);
+        return ResponseEntity.ok(profileResponse);
+    }
 }

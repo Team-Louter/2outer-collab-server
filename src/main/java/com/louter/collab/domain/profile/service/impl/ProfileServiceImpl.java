@@ -50,9 +50,19 @@ public class ProfileServiceImpl implements ProfileService {
         return ProfileResponse.of(savedProfile, user.getUserName(),projects);
     }
 
+    // 프로필 조회
     @Override
     public ProfileResponse getProfile(Long userId) {
-        return null;
+        User user = userRepository.findById(userId)
+                .orElseThrow(()->new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        Profile profile = profileRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("프로필을 찾을 수 없습니다."));
+
+        List<String> projects = userTeamRepository.findByUser_UserId(userId).stream()
+                .map(userTeam -> userTeam.getTeam().getTeamName())
+                .collect(Collectors.toList());
+        return ProfileResponse.of(profile, user.getUserName(), projects);
     }
 
     @Override
