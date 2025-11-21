@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -45,11 +45,40 @@ public class TeamController {
         return ResponseEntity.ok(TeamResponse.from(team, chatRoomIds));
     }
 
-    // 팀 조회
+    // 랜덤 팀 목록 조회
+    @GetMapping("/random")
+    public ResponseEntity<List<TeamResponse>> getRandomTeams() {
+        Long userId = getCurrentUserId();
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<Team> teams = teamService.getRandomTeams(userId);
+
+        List<TeamResponse> responses = teams.stream()
+                .map(team -> {
+                    List<Long> chatRoomIds = teamService.getChatRoomIds(team.getTeamId());
+                    return TeamResponse.from(team, chatRoomIds);
+                })
+                .toList();
+
+        return ResponseEntity.ok(responses);
+    }
+
+    // 팀 단건 조회
     @GetMapping("/{teamId}")
-    public ResponseEntity<TeamResponse> getTeam(@PathVariable Long teamId) {
-        Team team = teamService.getTeam(teamId);
-        List<Long> chatRoomIds = teamService.getChatRoomIds(teamId);
+    public ResponseEntity<?> getTeam(@PathVariable String teamId) {
+        if ("random".equals(teamId)) {
+            return getRandomTeams();
+        }
+
+        if (!teamId.matches("\\d+")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid team ID");
+        }
+
+        Long id = Long.parseLong(teamId);
+        Team team = teamService.getTeam(id);
+        List<Long> chatRoomIds = teamService.getChatRoomIds(id);
         return ResponseEntity.ok(TeamResponse.from(team, chatRoomIds));
     }
 
@@ -141,7 +170,9 @@ public class TeamController {
                 })
                 .toList();
         return ResponseEntity.ok(responses);
-    }    // 팀 멤버 목록
+    }
+
+    // 팀 멤버 목록
     @GetMapping("/{teamId}/members")
     public ResponseEntity<List<TeamMemberResponse>> getTeamMembers(@PathVariable Long teamId) {
         var members = teamService.getTeamMembers(teamId);

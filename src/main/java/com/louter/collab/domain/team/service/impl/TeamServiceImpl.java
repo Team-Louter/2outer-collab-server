@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -364,5 +365,15 @@ public class TeamServiceImpl implements TeamService {
         return chatRoomRepository.findByTeam_TeamId(teamId).stream()
                 .map(ChatRoom::getId)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Team> getRandomTeams(Long userId) {
+        List<Team> teams = teamRepository.findRandomTeamsNotJoinedByUser(userId);
+        List<Team> result = new ArrayList<>(teams);
+        while (result.size() < 16) {
+            result.add(null);
+        }
+        return result;
     }
 }

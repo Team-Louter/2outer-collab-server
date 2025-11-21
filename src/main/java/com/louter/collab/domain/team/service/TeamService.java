@@ -72,4 +72,9 @@ public interface TeamService {
      * 팀의 채팅방 ID 목록 조회
      */
     List<Long> getChatRoomIds(Long teamId);
+
+    /**
+     * 랜덤 팀 목록 조회 (내가 속하지 않은 팀)
+     */
+    List<Team> getRandomTeams(Long userId);
 }
