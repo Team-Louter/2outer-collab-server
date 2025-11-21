@@ -7,5 +7,4 @@ public interface ProfileService {
     ProfileResponse createProfile(Long userId, ProfileRequest profileRequest);
     ProfileResponse getProfile(Long userId);
     ProfileResponse updateProfile(Long userId, ProfileRequest profileRequest);
-    void deleteProfile(Long userId);
 }

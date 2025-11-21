@@ -8,6 +8,8 @@ import com.louter.collab.domain.profile.entity.Profile;
 import com.louter.collab.domain.profile.repository.ProfileRepository;
 import com.louter.collab.domain.profile.service.ProfileService;
 import com.louter.collab.domain.team.repository.UserTeamRepository;
+import com.louter.collab.global.common.exception.AlreadyExistProfileException;
+import com.louter.collab.global.common.exception.ProfileNotFoundException;
 import com.louter.collab.global.common.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,7 +33,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다."));
 
         if (profileRepository.existsById(userId)) {
-            throw new IllegalArgumentException("이미 프로필이 존재합니다.");
+            throw new AlreadyExistProfileException("이미 프로필이 존재합니다.");
         }
 
         user.setUserName(profileRequest.getUserName());
@@ -55,10 +57,10 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public ProfileResponse getProfile(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()->new IllegalArgumentException("유저를 찾을 수 없습니다."));
+                .orElseThrow(()->new UserNotFoundException("유저를 찾을 수 없습니다."));
 
         Profile profile = profileRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("프로필을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ProfileNotFoundException("프로필을 찾을 수 없습니다."));
 
         List<String> projects = userTeamRepository.findByUser_UserId(userId).stream()
                 .map(userTeam -> userTeam.getTeam().getTeamName())
@@ -71,10 +73,10 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public ProfileResponse updateProfile(Long userId, ProfileRequest profileRequest) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()->new IllegalArgumentException("유저를 찾을 수 없습니다."));
+                .orElseThrow(()->new UserNotFoundException("유저를 찾을 수 없습니다."));
 
         Profile profile = profileRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("프로필을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ProfileNotFoundException("프로필을 찾을 수 없습니다."));
 
         user.setUserName(profileRequest.getUserName());
         profile.setProfileImageUrl(profileRequest.getProfileImageUrl() == null ? "http://api.teamcollab.site/api/files/download/02c775b8-2792-44f2-955c-9c08d0ec4d10_defaultProfileImage.png" : profileRequest.getProfileImageUrl());
@@ -84,10 +86,5 @@ public class ProfileServiceImpl implements ProfileService {
                 .map(userTeam -> userTeam.getTeam().getTeamName())
                 .collect(Collectors.toList());
         return ProfileResponse.of(profile, user.getUserName(), projects);
-    }
-
-    @Override
-    public void deleteProfile(Long userId) {
-
     }
 }
