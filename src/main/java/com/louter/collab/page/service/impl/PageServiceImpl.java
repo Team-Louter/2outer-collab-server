@@ -61,9 +61,7 @@ public class PageServiceImpl implements PageService {
         Page page = pageRepository.findById(pageId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회의록을 찾을 수 없습니다."));
 
-        page = Page.builder()
-                .build();
-
+        page.update(request.getTitle());
         return PageResponse.from(pageRepository.save(page));
     }
 
