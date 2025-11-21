@@ -3,9 +3,9 @@ package com.louter.collab.domain.profile.entity;
 import com.louter.collab.domain.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.domain.Persistable;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "profiles")
-public class Profile {
+public class Profile implements Persistable<Long> {
     @Id
     @Column(name = "user_id")
     private Long userId;
@@ -27,8 +27,7 @@ public class Profile {
     private User user;
 
     @Column(name = "profile_image_url")
-    @Builder.Default
-    private String profileImageUrl= "http://api.teamcollab.site/api/files/download/02c775b8-2792-44f2-955c-9c08d0ec4d10_defaultProfileImage.png";
+    private String profileImageUrl;
 
     @Column(name = "bio")
     private String bio;
@@ -40,4 +39,15 @@ public class Profile {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Override
+    public Long getId() {
+        return userId;
+    }
+
+    // 새 엔티티인지 판별, createdAt이 null일 때
+    @Override
+    public boolean isNew() {
+        return createdAt == null;
+    }
 }

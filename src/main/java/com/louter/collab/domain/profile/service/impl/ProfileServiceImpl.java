@@ -11,6 +11,7 @@ import com.louter.collab.domain.team.repository.UserTeamRepository;
 import com.louter.collab.global.common.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ public class ProfileServiceImpl implements ProfileService {
     private final UserTeamRepository userTeamRepository;
 
     // 프로필 생성
+    @Transactional
     @Override
     public ProfileResponse createProfile(Long userId, ProfileRequest profileRequest) {
         User user = userRepository.findById(userId)
@@ -35,11 +37,11 @@ public class ProfileServiceImpl implements ProfileService {
         Profile profile = Profile.builder()
                 .userId(userId)
                 .user(user)
-                .profileImageUrl(profileRequest.getProfileImageUrl())
+                .profileImageUrl(profileRequest.getProfileImageUrl() == null ? "http://api.teamcollab.site/api/files/download/02c775b8-2792-44f2-955c-9c08d0ec4d10_defaultProfileImage.png" : profileRequest.getProfileImageUrl())
                 .bio(profileRequest.getBio())
                 .build();
 
-        Profile savedProfile = profileRepository.save(profile);
+        Profile savedProfile = profileRepository.saveAndFlush(profile);
 
         List<String> projects = userTeamRepository.findByUser_UserId(userId).stream()
                 .map(userTeam -> userTeam.getTeam().getTeamName())
