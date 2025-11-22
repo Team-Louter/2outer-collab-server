@@ -1,21 +1,20 @@
 package com.louter.collab.domain.page.service.impl;
 
-import com.louter.collab.auth.domain.User;
-import com.louter.collab.auth.repository.UserRepository;
-import com.louter.collab.common.exception.UserNotFoundException;
-import com.louter.collab.page.domain.Page;
-import com.louter.collab.page.dto.request.PageBlockEditRequest;
-import com.louter.collab.page.dto.request.PageCreateRequest;
-import com.louter.collab.page.dto.request.PageUpdateRequest;
-import com.louter.collab.page.dto.response.PageBlockResponse;
-import com.louter.collab.page.dto.response.PageResponse;
-import com.louter.collab.page.repository.PageBlockRepository;
+import com.louter.collab.domain.auth.entity.User;
+import com.louter.collab.domain.auth.repository.UserRepository;
+import com.louter.collab.domain.page.dto.request.PageBlockEditRequest;
+import com.louter.collab.domain.page.dto.request.PageCreateRequest;
+import com.louter.collab.domain.page.dto.request.PageUpdateRequest;
+import com.louter.collab.domain.page.dto.response.PageBlockResponse;
+import com.louter.collab.domain.page.dto.response.PageResponse;
+import com.louter.collab.domain.page.entity.Page;
 import com.louter.collab.domain.page.repository.PageChangeRepository;
 import com.louter.collab.domain.page.repository.PageCollaboratorRepository;
 import com.louter.collab.domain.page.repository.PageRepository;
 import com.louter.collab.domain.page.service.PageService;
-import com.louter.collab.team.domain.Team;
-import com.louter.collab.team.repository.TeamRepository;
+import com.louter.collab.domain.team.entity.Team;
+import com.louter.collab.domain.team.repository.TeamRepository;
+import com.louter.collab.global.common.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PageServiceImpl implements PageService {
-    private final PageBlockRepository pageBlockRepository;
     private final PageChangeRepository pageChangeRepository;
     private final PageCollaboratorRepository pageCollaboratorRepository;
     private final PageRepository pageRepository;
@@ -62,13 +60,18 @@ public class PageServiceImpl implements PageService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 회의록을 찾을 수 없습니다."));
 
         page.update(request.getTitle());
-        return PageResponse.from(pageRepository.save(page));
+        return PageResponse.from(page);
     }
 
     @Override
     @Transactional
     public List<PageBlockResponse> getBlocks(Long pageId) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Page page = pageRepository.findById(pageId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회의록을 찾을 수 없습니다."));
+
+        return page.getBlocks().stream()
+                .map(PageBlockResponse::from)
+                .toList();
     }
 
     @Override

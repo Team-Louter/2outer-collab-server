@@ -1,10 +1,11 @@
 package com.louter.collab.domain.page.service;
 
-import com.louter.collab.page.dto.request.PageBlockEditRequest;
-import com.louter.collab.page.dto.request.PageCreateRequest;
-import com.louter.collab.page.dto.request.PageUpdateRequest;
-import com.louter.collab.page.dto.response.PageBlockResponse;
-import com.louter.collab.page.dto.response.PageResponse;
+
+import com.louter.collab.domain.page.dto.request.PageBlockEditRequest;
+import com.louter.collab.domain.page.dto.request.PageCreateRequest;
+import com.louter.collab.domain.page.dto.request.PageUpdateRequest;
+import com.louter.collab.domain.page.dto.response.PageBlockResponse;
+import com.louter.collab.domain.page.dto.response.PageResponse;
 
 import java.util.List;
 
