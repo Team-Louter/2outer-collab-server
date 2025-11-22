@@ -3,7 +3,6 @@ package com.louter.collab.domain.auth.service.impl;
 import com.louter.collab.domain.auth.entity.User;
 import com.louter.collab.domain.auth.dto.request.LoginRequest;
 import com.louter.collab.domain.auth.dto.request.SignupRequest;
-import com.louter.collab.domain.auth.jwt.JwtAuthenticationFilter;
 import com.louter.collab.domain.auth.jwt.JwtTokenProvider;
 import com.louter.collab.domain.auth.repository.UserRepository;
 import com.louter.collab.domain.auth.service.AuthService;
@@ -23,7 +22,6 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final ValidationService validationService;
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @Override
     public void signup(SignupRequest signupRequest) {
         validationService.checkNull(signupRequest);

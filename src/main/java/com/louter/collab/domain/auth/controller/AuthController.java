@@ -5,7 +5,6 @@ import com.louter.collab.domain.auth.dto.request.SendVerificationEmailRequest;
 import com.louter.collab.domain.auth.dto.request.SignupRequest;
 import com.louter.collab.domain.auth.dto.response.LoginResponse;
 import com.louter.collab.domain.auth.entity.User;
-import com.louter.collab.domain.auth.repository.UserRepository;
 import com.louter.collab.domain.auth.service.AuthService;
 import com.louter.collab.domain.auth.service.EmailService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,7 +23,6 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
-    private final UserRepository userRepository;
     private final EmailService emailService;
 
     // 회원가입
