@@ -8,5 +8,5 @@ public class PageBlockEditRequest {
 
     private String type;
 
-    private Long orderIndex;
+    private Integer orderIndex;
 }

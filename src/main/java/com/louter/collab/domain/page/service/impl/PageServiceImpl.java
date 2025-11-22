@@ -8,6 +8,8 @@ import com.louter.collab.domain.page.dto.request.PageUpdateRequest;
 import com.louter.collab.domain.page.dto.response.PageBlockResponse;
 import com.louter.collab.domain.page.dto.response.PageResponse;
 import com.louter.collab.domain.page.entity.Page;
+import com.louter.collab.domain.page.entity.PageBlock;
+import com.louter.collab.domain.page.repository.PageBlockRepository;
 import com.louter.collab.domain.page.repository.PageChangeRepository;
 import com.louter.collab.domain.page.repository.PageCollaboratorRepository;
 import com.louter.collab.domain.page.repository.PageRepository;
@@ -30,6 +32,7 @@ public class PageServiceImpl implements PageService {
     private final PageRepository pageRepository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
+    private final PageBlockRepository pageBlockRepository;
 
     // 회의록 생성
     @Override
@@ -77,6 +80,12 @@ public class PageServiceImpl implements PageService {
     @Override
     @Transactional
     public PageBlockResponse editBlock(Long pageId, Long blockId, PageBlockEditRequest request){
-        throw new UnsupportedOperationException("Not implemented yet");
+
+        PageBlock block = pageBlockRepository.findById(blockId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 안건을 찾을 수 없습니다."));
+
+        block.update(request.getContent(), request.getType(), request.getOrderIndex());
+
+        return PageBlockResponse.from(block);
     }
 }
