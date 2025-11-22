@@ -13,13 +13,16 @@ import lombok.*;
 @Table(name = "page_collaborators")
 public class PageCollaborator {
 
-    @Id
+    @EmbeddedId
+    private PageCollaboratorId id;
+
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("pageId")
     @JoinColumn(name = "page_id", nullable = false)
     private Page page;
 
-    @Id
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

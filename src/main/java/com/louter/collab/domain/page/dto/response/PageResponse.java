@@ -1,6 +1,7 @@
 package com.louter.collab.domain.page.dto.response;
 
 import com.louter.collab.domain.page.entity.Page;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,9 +11,16 @@ import java.time.LocalDateTime;
 @Builder
 public class PageResponse {
     private Long id;
+
     private Long teamId;
+
     private String teamName;
+
+    @NotNull
     private String title;
+
+
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long authorId;
