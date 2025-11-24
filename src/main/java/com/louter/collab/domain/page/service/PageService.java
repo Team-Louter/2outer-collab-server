@@ -14,7 +14,18 @@ public interface PageService {
 
     PageResponse update(Long pageId, PageUpdateRequest request);
 
-    List<PageBlockResponse> getBlocks(Long pageId);
+    PageResponse getPage(Long pageId);
+
+    List<PageResponse> getPages(Long teamId);
+
+    void deletePage(Long pageId);
+
+
+    PageBlockResponse createBlock(Long pageId, PageBlockCreateRequest request);
 
     PageBlockResponse editBlock(Long pageId, Long blockId, PageBlockEditRequest request);
+
+    List<PageBlockResponse> getBlocks(Long pageId);
+
+    void deleteBlock(Long pageId, Long blockId);
 }

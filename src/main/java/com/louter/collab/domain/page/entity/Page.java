@@ -22,7 +22,7 @@ public class Page {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "page_id", nullable = false)
-    private Long id;
+    private Long pageId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", nullable = false)
@@ -42,6 +42,7 @@ public class Page {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
+
 
     @OneToMany(mappedBy = "page", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PageBlock> blocks = new ArrayList<>();

@@ -16,7 +16,6 @@ public class PageResponse {
 
     private String teamName;
 
-    @NotNull
     private String title;
 
 

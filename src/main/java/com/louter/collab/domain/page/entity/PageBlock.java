@@ -19,21 +19,14 @@ public class PageBlock {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "block_id", nullable = false)
-    private Long id;
+    private Long blockId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "page_id",nullable = false)
     private Page page;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_block_id")
-    private PageBlock parent;
-
     @Column(name = "content", nullable = false)
     private String content;
-
-    @Column(name = "type", length = 50, nullable = false)
-    private String type;
 
     @Column(name = "order_index", nullable = false)
     private Integer orderIndex;
@@ -52,7 +45,6 @@ public class PageBlock {
 
     public void update(String content, String type, Integer orderIndex) {
         this.content = content;
-        this.type = type;
         this.orderIndex = orderIndex;
     }
 }
