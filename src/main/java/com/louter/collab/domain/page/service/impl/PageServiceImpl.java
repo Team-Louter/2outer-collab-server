@@ -16,6 +16,9 @@ import com.louter.collab.domain.page.repository.PageRepository;
 import com.louter.collab.domain.page.service.PageService;
 import com.louter.collab.domain.team.entity.Team;
 import com.louter.collab.domain.team.repository.TeamRepository;
+import com.louter.collab.global.common.exception.EditNotFoundException;
+import com.louter.collab.global.common.exception.PageNotFoundException;
+import com.louter.collab.global.common.exception.TeamNotFoundException;
 import com.louter.collab.global.common.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,7 +44,7 @@ public class PageServiceImpl implements PageService {
 
         // team 조회
         Team team = teamRepository.findByTeamId(request.getTeamId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 팀을 찾을 수 없습니다."));
+                .orElseThrow(() -> new TeamNotFoundException("해당 팀을 찾을 수 없습니다."));
 
         // user 조회
         User author = userRepository.findByUserId(request.getAuthorId())
@@ -60,7 +63,7 @@ public class PageServiceImpl implements PageService {
     @Transactional
     public PageResponse update(Long pageId, PageUpdateRequest request) {
         Page page = pageRepository.findById(pageId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회의록을 찾을 수 없습니다."));
+                .orElseThrow(() -> new PageNotFoundException("해당 회의록을 찾을 수 없습니다."));
 
         page.update(request.getTitle());
         return PageResponse.from(page);
@@ -70,7 +73,7 @@ public class PageServiceImpl implements PageService {
     @Transactional
     public List<PageBlockResponse> getBlocks(Long pageId) {
         Page page = pageRepository.findById(pageId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회의록을 찾을 수 없습니다."));
+                .orElseThrow(() -> new PageNotFoundException("해당 회의록을 찾을 수 없습니다."));
 
         return page.getBlocks().stream()
                 .map(PageBlockResponse::from)
@@ -82,7 +85,7 @@ public class PageServiceImpl implements PageService {
     public PageBlockResponse editBlock(Long pageId, Long blockId, PageBlockEditRequest request){
 
         PageBlock block = pageBlockRepository.findById(blockId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 안건을 찾을 수 없습니다."));
+                .orElseThrow(() -> new EditNotFoundException("해당 안건을 찾을 수 없습니다."));
 
         block.update(request.getContent(), request.getType(), request.getOrderIndex());
 

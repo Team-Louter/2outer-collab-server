@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.domain.Persistable;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "profiles")
-public class Profile {
+public class Profile implements Persistable<Long> {
     @Id
     @Column(name = "user_id")
     private Long userId;
@@ -38,4 +39,15 @@ public class Profile {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Override
+    public Long getId() {
+        return userId;
+    }
+
+    // 새 엔티티인지 판별, createdAt이 null일 때
+    @Override
+    public boolean isNew() {
+        return createdAt == null;
+    }
 }
