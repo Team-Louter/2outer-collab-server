@@ -43,7 +43,6 @@ public class Page {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-
     @OneToMany(mappedBy = "page", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PageBlock> blocks = new ArrayList<>();
 
