@@ -9,30 +9,30 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "page_changes")
 @Builder
+@Table(name = "page_changes")
 public class PageChange {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "change_id", nullable = false)
-    private Long id;
+    @Column(name = "change_id")
+    private Long changeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "block_id", nullable = false)
-    private PageBlock pageBlock;
+    private PageBlock block;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "editor_id", nullable = false)
     private User editor;
 
-    @Column(name = "change_content", nullable = false)
+    @Column(name = "change_content", columnDefinition = "TEXT")
     private String changeContent;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
 }

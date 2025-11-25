@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notion-like Realtime Editor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: #f7f7f5;
+            margin: 0;
+            padding: 0;
+            color: #37352f;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .top-bar input {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .top-bar button {
+            padding: 5px 10px;
+            background: #2eaadc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .top-bar button:disabled {
+            background: #ccc;
+        }
+        .status-indicator {
+            margin-left: auto;
+            font-size: 12px;
+            color: #888;
+        }
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin-right: 5px;
+        }
+        .status-dot.connected { background-color: #2ecc71; }
+
+        /* Editor Area */
+        .editor-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            min-height: 800px;
+            padding: 50px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.05);
+            border-radius: 2px;
+        }
+
+        .page-title {
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            border: none;
+            width: 100%;
+            outline: none;
+            color: #37352f;
+        }
+
+        /* Blocks */
+        .block-wrapper {
+            position: relative;
+            margin-bottom: 8px;
+            padding-left: 24px; /* Space for handle */
+        }
+        
+        .block-wrapper:hover .block-handle {
+            opacity: 1;
+        }
+
+        .block-handle {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 20px;
+            height: 20px;
+            cursor: grab;
+            opacity: 0;
+            color: #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .block-handle:active {
+            cursor: grabbing;
+        }
+        
+        .block-wrapper.dragging {
+            opacity: 0.5;
+            background: #f0f0f0;
+        }
+        
+        .block-wrapper.drag-over-top {
+            border-top: 2px solid #2eaadc;
+        }
+        
+        .block-wrapper.drag-over-bottom {
+            border-bottom: 2px solid #2eaadc;
+        }
+
+        .editable-block {
+            outline: none;
+            min-height: 24px;
+            line-height: 1.5;
+        }
+
+        .editable-block:empty:before {
+            content: attr(placeholder);
+            color: #ccc;
+        }
+
+        /* Block Types */
+        .type-text { font-size: 16px; }
+        .type-heading1 { font-size: 30px; font-weight: 700; margin-top: 20px; margin-bottom: 10px; }
+        .type-heading2 { font-size: 24px; font-weight: 600; margin-top: 16px; margin-bottom: 8px; }
+        .type-todo { display: flex; align-items: center; }
+        
+        /* Debug Console */
+        .debug-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: #2d2d2d;
+            color: #00ff00;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 10px;
+            overflow-y: auto;
+            display: none; /* Hidden by default */
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="email" placeholder="Email" style="width: 120px;">
+            <input type="password" id="password" placeholder="Password" style="width: 80px;">
+            <button onclick="login()">Login</button>
+            <button onclick="signup()">Signup</button>
+        </div>
+        <div style="width: 1px; height: 20px; background: #ddd; margin: 0 10px;"></div>
+        <input type="text" id="token" placeholder="JWT Token" style="width: 150px;">
+        <input type="number" id="teamId" value="1" style="width: 60px;" placeholder="Team">
+        <input type="number" id="pageId" style="width: 80px;" placeholder="Page ID">
+        <button onclick="connect()">Connect</button>
+        <button onclick="createPage()">New Page</button>
+        <button onclick="toggleDebug()">Toggle Debug Log</button>
+        <div class="status-indicator">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Disconnected</span>
+        </div>
+    </div>
+
+    <div class="editor-container">
+        <input type="text" class="page-title" id="pageTitle" placeholder="Untitled" readonly>
+        <div id="blocks-container">
+            <!-- Blocks will be inserted here -->
+        </div>
+    </div>
+
+    <div class="debug-console" id="debugConsole"></div>
+
+    <script>
+        let stompClient = null;
+        let currentSubscription = null;
+        let updateTimeout = null;
+        let isConnected = false;
+
+        // --- Auth Logic ---
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                alert('Please enter email and password');
+                return;
+            }
+
+            try {
+                const res = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userEmail: email, userPassword: password })
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('token').value = data.token;
+                    log('Login successful! Token set.');
+                } else {
+                    log('Login failed');
+                    alert('Login failed');
+                }
+            } catch (e) {
+                log('Login error: ' + e);
+            }
+        }
+
+        async function signup() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                alert('Please enter email and password');
+                return;
+            }
+
+            try {
+                const res = await fetch('/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        userEmail: email, 
+                        userPassword: password,
+                        userName: email.split('@')[0] 
+                    })
+                });
+                
+                if (res.ok) {
+                    log('Signup successful! Please login.');
+                    alert('Signup successful! Please login.');
+                } else {
+                    log('Signup failed');
+                    alert('Signup failed');
+                }
+            } catch (e) {
+                log('Signup error: ' + e);
+            }
+        }
+
+        // --- Connection Logic ---
+
+        function connect() {
+            const token = document.getElementById('token').value;
+            const teamId = document.getElementById('teamId').value;
+            const pageId = document.getElementById('pageId').value;
+
+            if (!token || !teamId || !pageId) {
+                alert('Please enter Token, Team ID, and Page ID');
+                return;
+            }
+
+            const socket = new SockJS('/ws-stomp');
+            stompClient = Stomp.over(socket);
+            stompClient.debug = null; // Disable default debug logs to console
+
+            const headers = { 'Authorization': 'Bearer ' + token };
+
+            stompClient.connect(headers, function (frame) {
+                isConnected = true;
+                updateStatus(true, 'Connected');
+                log('WebSocket Connected');
+
+                // Subscribe
+                currentSubscription = stompClient.subscribe('/sub/teams/' + teamId + '/pages/' + pageId, function (message) {
+                    const body = JSON.parse(message.body);
+                    if (Array.isArray(body)) {
+                        log('Received update for ' + body.length + ' blocks');
+                    } else if (body.deletedBlockId) {
+                        log('Received delete for block ' + body.deletedBlockId);
+                    } else {
+                        log('Received update for block ' + body.blockId);
+                    }
+                    handleServerUpdate(body);
+                });
+                
+                // Load initial content
+                loadPage(teamId, pageId, token);
+
+            }, function(error) {
+                console.error(error);
+                updateStatus(false, 'Error: ' + error);
+                log('Connection Error: ' + error);
+            });
+        }
+
+        // --- Page Logic ---
+
+        async function createPage() {
+            const token = document.getElementById('token').value;
+            const teamId = document.getElementById('teamId').value;
+            
+            if(!token) { alert("Need token"); return; }
+
+            try {
+                const res = await fetch(`/teams/${teamId}/pages`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: "Untitled Page" })
+                });
+                const data = await res.json();
+                document.getElementById('pageId').value = data.pageId;
+                log('Created Page ID: ' + data.pageId);
+                alert('Page Created! ID: ' + data.pageId + '. Click Connect.');
+            } catch(e) {
+                log('Error creating page: ' + e);
+            }
+        }
+
+        async function loadPage(teamId, pageId, token) {
+            try {
+                const res = await fetch(`/teams/${teamId}/pages/${pageId}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const page = await res.json();
+                
+                document.getElementById('pageTitle').value = page.title;
+                const container = document.getElementById('blocks-container');
+                container.innerHTML = '';
+
+                if (page.blocks && page.blocks.length > 0) {
+                    page.blocks.sort((a, b) => a.orderIndex - b.orderIndex);
+                    page.blocks.forEach(block => renderBlock(block));
+                } else {
+                    // If empty page, add a default empty block
+                    // We can't easily create it on server without user action, 
+                    // but we can simulate "Click to add block" if connected.
+                    // Or just let the user click the button.
+                    // Let's try to auto-create one if connected.
+                    if (isConnected) {
+                        addNewBlock(0);
+                    }
+                }
+                log('Page loaded with ' + (page.blocks ? page.blocks.length : 0) + ' blocks');
+            } catch(e) {
+                log('Error loading page: ' + e);
+            }
+        }
+
+        // --- Rendering & Editing ---
+
+        let pendingFocusOrderIndex = null;
+
+        function renderBlock(block) {
+            const container = document.getElementById('blocks-container');
+            
+            let wrapper = document.getElementById('wrapper-' + block.blockId);
+            
+            if (wrapper) {
+                // Update existing
+                wrapper.dataset.order = block.orderIndex;
+                
+                const editable = wrapper.querySelector('.editable-block');
+                if (document.activeElement !== editable) {
+                    editable.innerText = block.content;
+                    editable.className = `editable-block type-${block.type}`;
+                }
+                
+                // Re-position if order changed
+                // We can just re-insert it to the correct position
+                insertWrapperAtCorrectPosition(container, wrapper, block.orderIndex);
+                
+                return;
+            }
+
+            // Create new
+            wrapper = document.createElement('div');
+            wrapper.className = 'block-wrapper';
+            wrapper.id = 'wrapper-' + block.blockId;
+            wrapper.dataset.order = block.orderIndex;
+
+            const handle = document.createElement('div');
+            handle.className = 'block-handle';
+            handle.innerHTML = '⋮⋮';
+            handle.draggable = true;
+            
+            // Drag Events
+            handle.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', block.blockId);
+                e.dataTransfer.effectAllowed = 'move';
+                wrapper.classList.add('dragging');
+            });
+            
+            handle.addEventListener('dragend', (e) => {
+                wrapper.classList.remove('dragging');
+                document.querySelectorAll('.block-wrapper').forEach(el => {
+                    el.classList.remove('drag-over-top');
+                    el.classList.remove('drag-over-bottom');
+                });
+            });
+            
+            // Drop target events on wrapper
+            wrapper.addEventListener('dragover', (e) => {
+                e.preventDefault(); // Allow drop
+                e.dataTransfer.dropEffect = 'move';
+                
+                const dragging = document.querySelector('.dragging');
+                if (dragging === wrapper) return;
+                
+                const rect = wrapper.getBoundingClientRect();
+                const midY = rect.top + rect.height / 2;
+                
+                if (e.clientY < midY) {
+                    wrapper.classList.add('drag-over-top');
+                    wrapper.classList.remove('drag-over-bottom');
+                } else {
+                    wrapper.classList.add('drag-over-bottom');
+                    wrapper.classList.remove('drag-over-top');
+                }
+            });
+            
+            wrapper.addEventListener('dragleave', (e) => {
+                wrapper.classList.remove('drag-over-top');
+                wrapper.classList.remove('drag-over-bottom');
+            });
+            
+            wrapper.addEventListener('drop', (e) => {
+                e.preventDefault();
+                wrapper.classList.remove('drag-over-top');
+                wrapper.classList.remove('drag-over-bottom');
+                
+                const draggingId = e.dataTransfer.getData('text/plain');
+                const draggingWrapper = document.getElementById('wrapper-' + draggingId);
+                
+                if (!draggingWrapper || draggingWrapper === wrapper) return;
+                
+                const rect = wrapper.getBoundingClientRect();
+                const midY = rect.top + rect.height / 2;
+                
+                let newOrderIndex;
+                const targetOrder = parseInt(wrapper.dataset.order);
+                
+                if (e.clientY < midY) {
+                    // Drop above
+                    newOrderIndex = targetOrder;
+                    
+                    // Correction if moving downwards
+                    const draggingOrder = parseInt(draggingWrapper.dataset.order);
+                    if (draggingOrder < targetOrder) {
+                        newOrderIndex = targetOrder - 1;
+                    }
+                } else {
+                    // Drop below
+                    newOrderIndex = targetOrder + 1;
+                    
+                    // Correction if moving upwards
+                    const draggingOrder = parseInt(draggingWrapper.dataset.order);
+                    if (draggingOrder < targetOrder) {
+                        newOrderIndex = targetOrder;
+                    }
+                }
+                
+                // Send update
+                const content = draggingWrapper.querySelector('.editable-block').innerText;
+                const type = draggingWrapper.querySelector('.editable-block').dataset.type;
+                
+                // Optimistic move
+                if (e.clientY < midY) {
+                    wrapper.parentNode.insertBefore(draggingWrapper, wrapper);
+                } else {
+                    wrapper.parentNode.insertBefore(draggingWrapper, wrapper.nextSibling);
+                }
+                
+                sendUpdate(draggingId, content, type, newOrderIndex);
+            });
+            
+            const editable = document.createElement('div');
+            editable.contentEditable = true;
+            editable.className = `editable-block type-${block.type}`;
+            editable.innerText = block.content;
+            editable.dataset.blockId = block.blockId;
+            editable.dataset.type = block.type;
+            
+            // Events
+            editable.addEventListener('input', (e) => {
+                const text = e.target.innerText;
+                
+                // Markdown shortcuts
+                if (text.startsWith('# ')) {
+                    e.target.innerText = text.substring(2);
+                    block.type = 'heading1';
+                    e.target.className = `editable-block type-heading1`;
+                    scheduleUpdate(block.blockId, e.target.innerText, 'heading1', block.orderIndex);
+                    return;
+                }
+                if (text.startsWith('## ')) {
+                    e.target.innerText = text.substring(3);
+                    block.type = 'heading2';
+                    e.target.className = `editable-block type-heading2`;
+                    scheduleUpdate(block.blockId, e.target.innerText, 'heading2', block.orderIndex);
+                    return;
+                }
+                if (text.startsWith('[] ')) {
+                    e.target.innerText = text.substring(3);
+                    block.type = 'todo';
+                    e.target.className = `editable-block type-todo`;
+                    scheduleUpdate(block.blockId, e.target.innerText, 'todo', block.orderIndex);
+                    return;
+                }
+
+                scheduleUpdate(block.blockId, text, block.type, block.orderIndex);
+            });
+            
+            editable.addEventListener('keydown', (e) => {
+                // Handle Multi-block delete
+                if (e.key === 'Backspace' || e.key === 'Delete') {
+                    if (handleMultiBlockDelete(e)) return;
+                }
+
+                // Enter key: Create new block
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    // Use current dataset order because it might have been updated
+                    const currentOrder = parseInt(wrapper.dataset.order);
+                    addNewBlock(currentOrder + 1);
+                }
+                
+                // Arrow Up: Focus previous block
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prevWrapper = wrapper.previousElementSibling;
+                    if (prevWrapper) {
+                        const prevEditable = prevWrapper.querySelector('.editable-block');
+                        if (prevEditable) {
+                            prevEditable.focus();
+                            const range = document.createRange();
+                            range.selectNodeContents(prevEditable);
+                            range.collapse(false);
+                            const sel = window.getSelection();
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                        }
+                    }
+                }
+
+                // Arrow Down: Focus next block
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const nextWrapper = wrapper.nextElementSibling;
+                    if (nextWrapper) {
+                        const nextEditable = nextWrapper.querySelector('.editable-block');
+                        if (nextEditable) nextEditable.focus();
+                    }
+                }
+                
+                // Backspace at start of block
+                if (e.key === 'Backspace') {
+                    const sel = window.getSelection();
+                    if (sel.isCollapsed && sel.rangeCount > 0) {
+                        const range = sel.getRangeAt(0);
+                        if (range.startOffset === 0) {
+                            // At start of block
+                            e.preventDefault();
+                            
+                            const prevWrapper = wrapper.previousElementSibling;
+                            if (prevWrapper) {
+                                // Merge with previous
+                                const prevEditable = prevWrapper.querySelector('.editable-block');
+                                const prevId = prevEditable.dataset.blockId;
+                                const prevContent = prevEditable.innerText;
+                                const currentContent = editable.innerText;
+                                const prevType = prevEditable.dataset.type;
+                                const prevOrder = parseInt(prevWrapper.dataset.order);
+                                
+                                // Optimistic update previous
+                                prevEditable.innerText = prevContent + currentContent;
+                                
+                                // Send update for previous
+                                sendUpdate(prevId, prevContent + currentContent, prevType, prevOrder);
+                                
+                                // Delete current
+                                deleteBlock(block.blockId);
+                                
+                                // Focus previous at join point
+                                prevEditable.focus();
+                                const r = document.createRange();
+                                // We want to place cursor after prevContent
+                                // Need to find the text node
+                                if (prevEditable.firstChild) {
+                                     // If it's a single text node
+                                     r.setStart(prevEditable.firstChild, prevContent.length);
+                                     r.collapse(true);
+                                } else {
+                                    // Empty previous block
+                                    r.selectNodeContents(prevEditable);
+                                    r.collapse(false);
+                                }
+                                sel.removeAllRanges();
+                                sel.addRange(r);
+                            } else {
+                                // No previous block. If empty, maybe do nothing or delete if it's not the only one?
+                                if (editable.innerText === '') {
+                                    // If it's the only block, don't delete
+                                    if (container.children.length > 1) {
+                                        deleteBlock(block.blockId);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            wrapper.appendChild(handle);
+            wrapper.appendChild(editable);
+            
+            insertWrapperAtCorrectPosition(container, wrapper, block.orderIndex);
+
+            // Focus if this is the block we were waiting for
+            if (pendingFocusOrderIndex !== null && block.orderIndex === pendingFocusOrderIndex) {
+                editable.focus();
+                pendingFocusOrderIndex = null;
+            }
+        }
+
+        function insertWrapperAtCorrectPosition(container, wrapper, orderIndex) {
+            const children = Array.from(container.children);
+            
+            // Check if already in correct position
+            // Find the expected next sibling
+            let expectedNextSibling = null;
+            for (let child of children) {
+                if (child === wrapper) continue;
+                const childOrder = parseInt(child.dataset.order);
+                if (orderIndex < childOrder) {
+                    expectedNextSibling = child;
+                    break;
+                }
+            }
+            
+            // If currently next sibling is correct, do nothing
+            if (wrapper.parentNode === container && wrapper.nextElementSibling === expectedNextSibling) {
+                return;
+            }
+            
+            // Move
+            if (expectedNextSibling) {
+                container.insertBefore(wrapper, expectedNextSibling);
+            } else {
+                container.appendChild(wrapper);
+            }
+        }
+
+        function getBlockWrapper(node) {
+            if (!node) return null;
+            return node.nodeType === 1 ? node.closest('.block-wrapper') : node.parentElement.closest('.block-wrapper');
+        }
+
+        function handleMultiBlockDelete(e) {
+            const sel = window.getSelection();
+            if (sel.isCollapsed) return false;
+
+            const range = sel.getRangeAt(0);
+            const startWrapper = getBlockWrapper(range.startContainer);
+            const endWrapper = getBlockWrapper(range.endContainer);
+
+            if (startWrapper && endWrapper && startWrapper !== endWrapper) {
+                e.preventDefault();
+                
+                // Identify all blocks in range
+                const container = document.getElementById('blocks-container');
+                const children = Array.from(container.children);
+                const startIndex = children.indexOf(startWrapper);
+                const endIndex = children.indexOf(endWrapper);
+                
+                if (startIndex === -1 || endIndex === -1) return true;
+                
+                const minIndex = Math.min(startIndex, endIndex);
+                const maxIndex = Math.max(startIndex, endIndex);
+                
+                // Delete all blocks in range
+                // Ideally we should merge first and last, but for now let's delete all fully selected
+                // and keep the first one's start? 
+                // User said: "If drag... not one block... delete all".
+                // Let's delete all involved blocks except maybe the first one if we want to keep focus?
+                // Or just delete all and focus the one before?
+                
+                // Let's delete ALL blocks in the selection range for simplicity and robustness
+                for (let i = minIndex; i <= maxIndex; i++) {
+                    const wrapper = children[i];
+                    const blockId = wrapper.querySelector('.editable-block').dataset.blockId;
+                    deleteBlock(blockId); // This is optimistic now
+                }
+                
+                // Focus the block before the selection, or create a new one if everything deleted
+                const prev = children[minIndex - 1];
+                if (prev) {
+                    const editable = prev.querySelector('.editable-block');
+                    editable.focus();
+                    // Move cursor to end
+                    const r = document.createRange();
+                    r.selectNodeContents(editable);
+                    r.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(r);
+                } else {
+                    // If we deleted the first block, maybe create a new empty one?
+                    // Or focus the next one (which doesn't exist because we deleted it).
+                    // Let's create a new block if page becomes empty
+                    if (container.children.length === 0) {
+                         addNewBlock(0);
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        function addNewBlock(orderIndex = 0) {
+            if (!isConnected) { alert("Please connect first"); return; }
+            
+            pendingFocusOrderIndex = orderIndex;
+
+            const teamId = document.getElementById('teamId').value;
+            const pageId = document.getElementById('pageId').value;
+
+            const payload = {
+                blockId: null,
+                parentBlockId: null,
+                content: "",
+                type: "text",
+                orderIndex: orderIndex
+            };
+
+            stompClient.send(`/pub/teams/${teamId}/pages/${pageId}/update`, {}, JSON.stringify(payload));
+            log('Requested new block creation...');
+        }
+
+        function scheduleUpdate(blockId, content, type, orderIndex) {
+            if (updateTimeout) clearTimeout(updateTimeout);
+            
+            updateTimeout = setTimeout(() => {
+                sendUpdate(blockId, content, type, orderIndex);
+            }, 500); // Debounce 500ms
+        }
+
+        function sendUpdate(blockId, content, type, orderIndex) {
+            if (!isConnected) return;
+            
+            const teamId = document.getElementById('teamId').value;
+            const pageId = document.getElementById('pageId').value;
+
+            const payload = {
+                blockId: blockId,
+                parentBlockId: null,
+                content: content,
+                type: type,
+                orderIndex: orderIndex
+            };
+
+            stompClient.send(`/pub/teams/${teamId}/pages/${pageId}/update`, {}, JSON.stringify(payload));
+            log(`Sent update for block ${blockId}: "${content.substring(0, 20)}..."`);
+        }
+
+        function deleteBlock(blockId) {
+            if (!isConnected || !blockId) return;
+            
+            // Optimistic delete
+            const el = document.getElementById('wrapper-' + blockId);
+            if (el) el.remove();
+            
+            const teamId = document.getElementById('teamId').value;
+            const pageId = document.getElementById('pageId').value;
+
+            stompClient.send(`/pub/teams/${teamId}/pages/${pageId}/delete`, {}, JSON.stringify(blockId));
+            log(`Requested delete for block ${blockId}`);
+        }
+
+        function handleServerUpdate(message) {
+            if (message.deletedBlockId) {
+                const el = document.getElementById('wrapper-' + message.deletedBlockId);
+                if (el) el.remove();
+                return;
+            }
+            
+            if (Array.isArray(message)) {
+                message.forEach(block => renderBlock(block));
+            } else {
+                renderBlock(message);
+            }
+        }
+
+        // --- Utilities ---
+
+        function updateStatus(connected, text) {
+            const dot = document.getElementById('statusDot');
+            const txt = document.getElementById('statusText');
+            if (connected) {
+                dot.classList.add('connected');
+            } else {
+                dot.classList.remove('connected');
+            }
+            txt.innerText = text;
+        }
+
+        function log(msg) {
+            const consoleEl = document.getElementById('debugConsole');
+            const line = document.createElement('div');
+            line.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            consoleEl.appendChild(line);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        function toggleDebug() {
+            const el = document.getElementById('debugConsole');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+    </script>
+</body>
+</html>

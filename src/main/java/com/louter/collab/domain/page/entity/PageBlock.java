@@ -10,49 +10,46 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "page_blocks")
 @Builder
+@Table(name = "page_blocks", indexes = {
+    @Index(name = "idx_page_order", columnList = "page_id, order_index")
+})
 public class PageBlock {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "block_id", nullable = false)
-    private Long id;
+    @Column(name = "block_id")
+    private Long blockId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "page_id",nullable = false)
+    @JoinColumn(name = "page_id", nullable = false)
     private Page page;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_block_id")
-    private PageBlock parent;
+    private PageBlock parentBlock;
 
-    @Column(name = "content", nullable = false)
+    @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "type", length = 50, nullable = false)
+    @Column(length = 50)
     private String type;
 
-    @Column(name = "order_index", nullable = false)
+    @Column(name = "order_index")
     private Integer orderIndex;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    public void update(String content, String type, Integer orderIndex) {
-        this.content = content;
-        this.type = type;
-        this.orderIndex = orderIndex;
-    }
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

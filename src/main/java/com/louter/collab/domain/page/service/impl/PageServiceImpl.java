@@ -2,21 +2,19 @@ package com.louter.collab.domain.page.service.impl;
 
 import com.louter.collab.domain.auth.entity.User;
 import com.louter.collab.domain.auth.repository.UserRepository;
-import com.louter.collab.domain.page.dto.request.PageBlockEditRequest;
+import com.louter.collab.domain.page.dto.request.PageBlockUpdateRequest;
 import com.louter.collab.domain.page.dto.request.PageCreateRequest;
-import com.louter.collab.domain.page.dto.request.PageUpdateRequest;
 import com.louter.collab.domain.page.dto.response.PageBlockResponse;
 import com.louter.collab.domain.page.dto.response.PageResponse;
 import com.louter.collab.domain.page.entity.Page;
 import com.louter.collab.domain.page.entity.PageBlock;
+import com.louter.collab.domain.page.entity.PageChange;
 import com.louter.collab.domain.page.repository.PageBlockRepository;
 import com.louter.collab.domain.page.repository.PageChangeRepository;
-import com.louter.collab.domain.page.repository.PageCollaboratorRepository;
 import com.louter.collab.domain.page.repository.PageRepository;
 import com.louter.collab.domain.page.service.PageService;
 import com.louter.collab.domain.team.entity.Team;
 import com.louter.collab.domain.team.repository.TeamRepository;
-import com.louter.collab.global.common.exception.EditNotFoundException;
 import com.louter.collab.global.common.exception.PageNotFoundException;
 import com.louter.collab.global.common.exception.TeamNotFoundException;
 import com.louter.collab.global.common.exception.UserNotFoundException;
@@ -25,70 +23,145 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class PageServiceImpl implements PageService {
-    private final PageChangeRepository pageChangeRepository;
-    private final PageCollaboratorRepository pageCollaboratorRepository;
+
     private final PageRepository pageRepository;
+    private final PageBlockRepository pageBlockRepository;
+    private final PageChangeRepository pageChangeRepository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
-    private final PageBlockRepository pageBlockRepository;
 
-    // 회의록 생성
     @Override
-    @Transactional
-    public PageResponse create(PageCreateRequest request) {
-
-        // team 조회
-        Team team = teamRepository.findByTeamId(request.getTeamId())
-                .orElseThrow(() -> new TeamNotFoundException("해당 팀을 찾을 수 없습니다."));
-
-        // user 조회
-        User author = userRepository.findByUserId(request.getAuthorId())
-                .orElseThrow(() -> new UserNotFoundException("해당 작성자를 찾을 수 없습니다."));
+    public PageResponse createPage(Long teamId, Long userId, PageCreateRequest request) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamNotFoundException("Team not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Page page = Page.builder()
                 .team(team)
                 .title(request.getTitle())
-                .author(author)
+                .author(user)
                 .build();
 
         return PageResponse.from(pageRepository.save(page));
     }
 
     @Override
-    @Transactional
-    public PageResponse update(Long pageId, PageUpdateRequest request) {
+    @Transactional(readOnly = true)
+    public PageResponse getPage(Long pageId) {
         Page page = pageRepository.findById(pageId)
-                .orElseThrow(() -> new PageNotFoundException("해당 회의록을 찾을 수 없습니다."));
-
-        page.update(request.getTitle());
+                .orElseThrow(() -> new PageNotFoundException("Page not found"));
         return PageResponse.from(page);
     }
 
     @Override
-    @Transactional
-    public List<PageBlockResponse> getBlocks(Long pageId) {
-        Page page = pageRepository.findById(pageId)
-                .orElseThrow(() -> new PageNotFoundException("해당 회의록을 찾을 수 없습니다."));
-
-        return page.getBlocks().stream()
-                .map(PageBlockResponse::from)
-                .toList();
+    @Transactional(readOnly = true)
+    public List<PageResponse> getPagesByTeam(Long teamId) {
+        return pageRepository.findByTeamTeamId(teamId).stream()
+                .map(PageResponse::from)
+                .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional
-    public PageBlockResponse editBlock(Long pageId, Long blockId, PageBlockEditRequest request){
+    public List<PageBlockResponse> updateBlock(Long pageId, Long userId, PageBlockUpdateRequest request) {
+        Page page = pageRepository.findById(pageId)
+                .orElseThrow(() -> new PageNotFoundException("Page not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
+        PageBlock block;
+        boolean isNew = false;
+        
+        if (request.getBlockId() != null) {
+            block = pageBlockRepository.findById(request.getBlockId())
+                    .orElseThrow(() -> new IllegalArgumentException("Block not found"));
+            
+            // Record change
+            PageChange change = PageChange.builder()
+                    .block(block)
+                    .editor(user)
+                    .changeContent(request.getContent())
+                    .build();
+            pageChangeRepository.save(change);
+            
+        } else {
+            isNew = true;
+            block = PageBlock.builder()
+                    .page(page)
+                    .author(user)
+                    .build();
+        }
+
+        if (request.getParentBlockId() != null) {
+            PageBlock parent = pageBlockRepository.findById(request.getParentBlockId())
+                    .orElse(null);
+            block.setParentBlock(parent);
+        }
+
+        block.setContent(request.getContent());
+        block.setType(request.getType());
+        
+        if (isNew && request.getOrderIndex() != null) {
+            // Shift existing blocks down
+            pageBlockRepository.incrementOrderIndex(pageId, request.getOrderIndex());
+            block.setOrderIndex(request.getOrderIndex());
+            pageBlockRepository.save(block);
+            
+            // Return all affected blocks so frontend can update their order
+            List<PageBlock> affectedBlocks = pageBlockRepository.findByPagePageIdAndOrderIndexGreaterThanEqualOrderByOrderIndexDesc(pageId, request.getOrderIndex());
+            return affectedBlocks.stream()
+                    .map(PageBlockResponse::from)
+                    .collect(Collectors.toList());
+        } else if (!isNew && request.getOrderIndex() != null && !request.getOrderIndex().equals(block.getOrderIndex())) {
+            // Reordering existing block
+            int oldIndex = block.getOrderIndex();
+            int newIndex = request.getOrderIndex();
+            
+            if (newIndex > oldIndex) {
+                pageBlockRepository.decrementOrderIndexRange(pageId, oldIndex, newIndex);
+            } else {
+                pageBlockRepository.incrementOrderIndexRange(pageId, newIndex, oldIndex);
+            }
+            block.setOrderIndex(newIndex);
+            pageBlockRepository.save(block);
+            
+            // Return affected blocks
+            int start = Math.min(oldIndex, newIndex);
+            int end = Math.max(oldIndex, newIndex);
+            List<PageBlock> affectedBlocks = pageBlockRepository.findByPagePageIdAndOrderIndexBetween(pageId, start, end);
+            return affectedBlocks.stream()
+                    .map(PageBlockResponse::from)
+                    .collect(Collectors.toList());
+        } else {
+            block.setOrderIndex(request.getOrderIndex());
+            return List.of(PageBlockResponse.from(pageBlockRepository.save(block)));
+        }
+    }
+
+    @Override
+    public void deleteBlock(Long pageId, Long userId, Long blockId) {
         PageBlock block = pageBlockRepository.findById(blockId)
-                .orElseThrow(() -> new EditNotFoundException("해당 안건을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("Block not found"));
+        
+        // Check if block belongs to page
+        if (!block.getPage().getPageId().equals(pageId)) {
+            throw new IllegalArgumentException("Block does not belong to this page");
+        }
 
-        block.update(request.getContent(), request.getType(), request.getOrderIndex());
+        Integer deletedOrderIndex = block.getOrderIndex();
 
-        return PageBlockResponse.from(block);
+        // Delete associated changes first to avoid FK constraint violation
+        pageChangeRepository.deleteByBlock(block);
+
+        pageBlockRepository.delete(block);
+        
+        // Shift subsequent blocks up
+        pageBlockRepository.decrementOrderIndexAfter(pageId, deletedOrderIndex);
     }
 }
