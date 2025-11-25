@@ -26,13 +26,14 @@ public class TodoController {
         return todoService.getTodos();
     }
 
-    @PatchMapping("/{todoId}")
+    @PutMapping("/{todoId}")
     public TodoResponse updateTodo(
             @PathVariable Long todoId,
             @RequestBody TodoUpdateRequest request
     ) {
         return todoService.updateTodo(todoId, request);
     }
+
 
     @DeleteMapping("/{todoId}")
     public void deleteTodo(@PathVariable Long todoId) {
