@@ -11,19 +11,16 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Table(name = "page_collaborators")
+@IdClass(PageCollaboratorId.class)
 public class PageCollaborator {
 
-    @EmbeddedId
-    private PageCollaboratorId id;
-
+    @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("pageId")
     @JoinColumn(name = "page_id", nullable = false)
     private Page page;
 
+    @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId")
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
 }
