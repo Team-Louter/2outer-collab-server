@@ -39,7 +39,7 @@ public class TodoServiceImpl implements TodoService {
                 .orElseThrow(() -> new TodoNotFoundException("해당 Todo를 찾을 수 없습니다 : " + todoId));
 
         todo.setTitle(request.getTitle());
-        todo.setDone(request.getDone());
+        todo.setDone(request.isDone());
 
         return TodoResponse.from(todo);
     }

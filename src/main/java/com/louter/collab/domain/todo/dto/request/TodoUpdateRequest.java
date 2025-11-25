@@ -8,5 +8,5 @@ public class TodoUpdateRequest {
     @NotNull
     private String title;
     @NotNull
-    private Boolean done;
+    private boolean done;
 }
