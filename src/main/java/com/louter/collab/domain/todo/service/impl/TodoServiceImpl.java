@@ -38,6 +38,9 @@ public class TodoServiceImpl implements TodoService {
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new TodoNotFoundException("해당 Todo를 찾을 수 없습니다 : " + todoId));
 
+        todo.setTitle(request.getTitle());
+        todo.setDone(request.getDone());
+
         return TodoResponse.from(todo);
     }
 
