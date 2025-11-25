@@ -22,11 +22,7 @@ public class Page {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-<<<<<<< HEAD
-    @Column(name = "page_id", nullable = false)
-=======
     @Column(name = "page_id")
->>>>>>> origin/main
     private Long pageId;
 
     @ManyToOne(fetch = FetchType.LAZY)
