@@ -1,27 +1,15 @@
 package com.louter.collab.domain.page.entity;
 
-import jakarta.persistence.Column;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.Objects;
+import java.io.Serializable;
 
-public class PageCollaboratorId {
-
-    @Column(name = "page_id")
-    private Long pageId;
-
-    @Column(name = "user_id")
-    private Long userId;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PageCollaboratorId that)) return false;
-        return Objects.equals(pageId, that.pageId)
-                && Objects.equals(userId, that.userId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(pageId, userId);
-    }
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class PageCollaboratorId implements Serializable {
+    private Long page;
+    private Long user;
 }

@@ -37,6 +37,8 @@ public class SecurityConfig {
                         .requestMatchers("/", "/auth/**", "/email/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs").permitAll()
                         .requestMatchers("/chat.html").permitAll()
+                        .requestMatchers("/page.html").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/ws/**", "/ws-stomp/**").permitAll()
                         .requestMatchers("/teams/**").authenticated()
                         .anyRequest().authenticated()

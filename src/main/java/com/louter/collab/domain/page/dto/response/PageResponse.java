@@ -1,40 +1,35 @@
 package com.louter.collab.domain.page.dto.response;
 
 import com.louter.collab.domain.page.entity.Page;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Builder
 public class PageResponse {
-    private Long id;
-
+    private Long pageId;
     private Long teamId;
-
-    private String teamName;
-
     private String title;
-
-
-
+    private Long authorId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Long authorId;
-    private String authorName;
+    private List<PageBlockResponse> blocks;
 
     public static PageResponse from(Page page) {
         return PageResponse.builder()
-                .id(page.getId())
+                .pageId(page.getPageId())
                 .teamId(page.getTeam().getTeamId())
-                .teamName(page.getTeam().getTeamName())
                 .title(page.getTitle())
+                .authorId(page.getAuthor().getUserId())
                 .createdAt(page.getCreatedAt())
                 .updatedAt(page.getUpdatedAt())
-                .authorId(page.getAuthor().getUserId())
-                .authorName(page.getAuthor().getUserName())
+                .blocks(page.getBlocks().stream()
+                        .map(PageBlockResponse::from)
+                        .collect(Collectors.toList()))
                 .build();
     }
 }

@@ -13,40 +13,42 @@ import java.util.List;
 
 @Entity
 @Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "pages")
 @Builder
+@Table(name = "pages")
 public class Page {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+<<<<<<< HEAD
     @Column(name = "page_id", nullable = false)
+=======
+    @Column(name = "page_id")
+>>>>>>> origin/main
     private Long pageId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", nullable = false)
     private Team team;
 
-    @Column(name = "title", nullable = false)
+    @Column(nullable = false)
     private String title;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    @Builder.Default
     @OneToMany(mappedBy = "page", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PageBlock> blocks = new ArrayList<>();
 
-    public void update(String title) {
-        this.title = title;
-    }
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

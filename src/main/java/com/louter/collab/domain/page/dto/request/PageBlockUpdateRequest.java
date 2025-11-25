@@ -1,16 +1,14 @@
 package com.louter.collab.domain.page.dto.request;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-public class PageBlockEditRequest {
-    @NotNull
+@NoArgsConstructor
+public class PageBlockUpdateRequest {
+    private Long blockId;
+    private Long parentBlockId;
     private String content;
-
-    @NotNull
     private String type;
-
-    @NotNull
     private Integer orderIndex;
 }

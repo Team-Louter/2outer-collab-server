@@ -41,6 +41,7 @@ public class Team {
     @Column(name = "intro", length = 255)
     private String intro;
 
+    @Builder.Default
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatRoom> chatRooms = new ArrayList<>();
 
