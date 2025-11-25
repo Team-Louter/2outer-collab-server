@@ -33,5 +33,5 @@ public class Todo {
     private LocalDateTime updatedAt;
 
     @Builder.Default
-    private Boolean done = false;
+    private boolean done = false;
 }
