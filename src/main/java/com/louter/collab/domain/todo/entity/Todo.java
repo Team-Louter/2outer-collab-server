@@ -21,7 +21,7 @@ public class Todo {
     @Column(name = "todo_id", nullable = false)
     private Long todoId;
 
-    @Column(name = "title", length = 20, nullable = false)
+    @Column(name = "title", length = 70, nullable = false)
     private String title;
 
     @CreationTimestamp
