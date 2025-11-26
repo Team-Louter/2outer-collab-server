@@ -293,6 +293,16 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    public long getTeamMemberCount(@NonNull Long teamId) {
+        // 팀 존재 확인
+        if (!teamRepository.existsById(teamId)) {
+            throw new TeamNotFoundException("팀을 찾을 수 없습니다.");
+        }
+
+        return userTeamRepository.countByTeam_TeamId(teamId);
+    }
+
+    @Override
     @Transactional
     public void changeMemberRole(@NonNull Long adminUserId, @NonNull Long teamId, @NonNull Long targetUserId, @NonNull Long newRoleId) {
         // 팀 존재 확인
