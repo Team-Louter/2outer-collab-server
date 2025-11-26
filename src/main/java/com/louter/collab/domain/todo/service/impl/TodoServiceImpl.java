@@ -40,6 +40,7 @@ public class TodoServiceImpl implements TodoService {
 
         todo.setTitle(request.getTitle());
         todo.setDone(request.isDone());
+        todoRepository.save(todo);
 
         return TodoResponse.from(todo);
     }
