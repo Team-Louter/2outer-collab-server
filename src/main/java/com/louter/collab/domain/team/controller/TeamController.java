@@ -60,6 +60,9 @@ public class TeamController {
 
         List<TeamResponse> responses = teams.stream()
                 .map(team -> {
+                    if (team == null) {
+                        return null;
+                    }
                     List<Long> chatRoomIds = teamService.getChatRoomIds(team.getTeamId());
                     return TeamResponse.from(team, chatRoomIds);
                 })

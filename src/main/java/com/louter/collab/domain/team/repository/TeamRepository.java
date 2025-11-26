@@ -12,6 +12,6 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     Optional<Team> findByTeamId(Long teamId);
     boolean existsByTeamName(String teamName);
 
-    @Query(value = "SELECT * FROM teams t WHERE t.team_id NOT IN (SELECT ut.team_id FROM users_teams ut WHERE ut.user_id = :userId) ORDER BY RAND() LIMIT 16", nativeQuery = true)
+    @Query(value = "SELECT * FROM teams t WHERE t.team_id NOT IN (SELECT ut.team_id FROM users_teams ut WHERE ut.user_id = :userId) ORDER BY RAND() LIMIT 18", nativeQuery = true)
     List<Team> findRandomTeamsNotJoinedByUser(Long userId);
 }
