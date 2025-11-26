@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class TodoResponse {
     private Long todoId;
     private String title;
-    private Boolean done;
+    private boolean done;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -19,7 +19,7 @@ public class TodoResponse {
         return TodoResponse.builder()
                 .todoId(todo.getTodoId())
                 .title(todo.getTitle())
-                .done(todo.getDone())
+                .done(todo.isDone())
                 .createdAt(todo.getCreatedAt())
                 .updatedAt(todo.getUpdatedAt())
                 .build();
