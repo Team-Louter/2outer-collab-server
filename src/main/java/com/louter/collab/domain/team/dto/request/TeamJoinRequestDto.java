@@ -11,9 +11,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TeamJoinRequestDto {
+//
+//    @NotNull
+//    private Long teamId;
 
     @NotNull
-    private Long teamId;
-    
+    private String introduction;
+
     private String workUrl;
 }
