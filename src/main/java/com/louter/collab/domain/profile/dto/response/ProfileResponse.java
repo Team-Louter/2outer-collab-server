@@ -22,14 +22,14 @@ public class ProfileResponse {
     @NotNull
     private String profileImageUrl;
 
-    private List<String> projects;
+    private List<ProjectInfoResponse> projects;
     private String bio;
 
     @NotNull
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static ProfileResponse of(Profile profile, String userName, List<String> projects) {
+    public static ProfileResponse of(Profile profile, String userName, List<ProjectInfoResponse> projects) {
         return ProfileResponse.builder()
                 .userId(profile.getUserId())
                 .userName(userName)

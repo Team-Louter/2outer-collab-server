@@ -112,7 +112,7 @@ public class TeamController {
     // 팀 가입 신청
     @PostMapping("/{teamId}/join-request")
     public ResponseEntity<TeamJoinRequestResponse> requestJoinTeam(
-            @PathVariable Long teamId,
+            @PathVariable("teamId") Long teamId,
             @RequestBody TeamJoinRequestDto request) {
         Long userId = getCurrentUserId();
         var joinRequest = teamService.requestJoinTeam(userId, teamId, request.getIntroduction(),request.getWorkUrl());

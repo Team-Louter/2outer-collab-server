@@ -4,6 +4,7 @@ import com.louter.collab.domain.auth.entity.User;
 import com.louter.collab.domain.auth.repository.UserRepository;
 import com.louter.collab.domain.profile.dto.request.ProfileRequest;
 import com.louter.collab.domain.profile.dto.response.ProfileResponse;
+import com.louter.collab.domain.profile.dto.response.ProjectInfoResponse;
 import com.louter.collab.domain.profile.entity.Profile;
 import com.louter.collab.domain.profile.repository.ProfileRepository;
 import com.louter.collab.domain.profile.service.ProfileService;
@@ -41,16 +42,19 @@ public class ProfileServiceImpl implements ProfileService {
                 .userId(userId)
                 .user(user)
                 .profileImageUrl(profileRequest.getProfileImageUrl() == null ? "http://api.teamcollab.site/api/files/download/02c775b8-2792-44f2-955c-9c08d0ec4d10_defaultProfileImage.png" : profileRequest.getProfileImageUrl())
-                .bio(profileRequest.getBio())
+                .bio(profileRequest.getBio() == null ? "안녕하세요!!" : profileRequest.getBio())
                 .build();
 
         Profile savedProfile = profileRepository.saveAndFlush(profile);
 
-        List<String> projects = userTeamRepository.findByUser_UserId(userId).stream()
-                .map(userTeam -> userTeam.getTeam().getTeamName())
+        List<ProjectInfoResponse> projects = userTeamRepository.findByUser_UserId(userId).stream()
+                .map(userTeam -> ProjectInfoResponse.builder()
+                        .teamId(userTeam.getTeam().getTeamId())
+                        .projectPicture(userTeam.getTeam().getProfilePicture())
+                        .build())
                 .collect(Collectors.toList());
 
-        return ProfileResponse.of(savedProfile, user.getUserName(),projects);
+        return ProfileResponse.of(savedProfile, user.getUserName(), projects);
     }
 
     // 프로필 조회
@@ -62,8 +66,11 @@ public class ProfileServiceImpl implements ProfileService {
         Profile profile = profileRepository.findById(userId)
                 .orElseThrow(() -> new ProfileNotFoundException("프로필을 찾을 수 없습니다."));
 
-        List<String> projects = userTeamRepository.findByUser_UserId(userId).stream()
-                .map(userTeam -> userTeam.getTeam().getTeamName())
+        List<ProjectInfoResponse> projects = userTeamRepository.findByUser_UserId(userId).stream()
+                .map(userTeam -> ProjectInfoResponse.builder()
+                        .teamId(userTeam.getTeam().getTeamId())
+                        .projectPicture(userTeam.getTeam().getProfilePicture())
+                        .build())
                 .collect(Collectors.toList());
         return ProfileResponse.of(profile, user.getUserName(), projects);
     }
@@ -82,8 +89,11 @@ public class ProfileServiceImpl implements ProfileService {
         profile.setProfileImageUrl(profileRequest.getProfileImageUrl() == null ? "http://api.teamcollab.site/api/files/download/02c775b8-2792-44f2-955c-9c08d0ec4d10_defaultProfileImage.png" : profileRequest.getProfileImageUrl());
         profile.setBio(profileRequest.getBio());
 
-        List<String> projects = userTeamRepository.findByUser_UserId(userId).stream()
-                .map(userTeam -> userTeam.getTeam().getTeamName())
+        List<ProjectInfoResponse> projects = userTeamRepository.findByUser_UserId(userId).stream()
+                .map(userTeam -> ProjectInfoResponse.builder()
+                        .teamId(userTeam.getTeam().getTeamId())
+                        .projectPicture(userTeam.getTeam().getProfilePicture())
+                        .build())
                 .collect(Collectors.toList());
         return ProfileResponse.of(profile, user.getUserName(), projects);
     }
