@@ -1,6 +1,8 @@
 package com.louter.collab.domain.team.controller;
 
 import com.louter.collab.domain.auth.jwt.JwtTokenProvider;
+import com.louter.collab.domain.profile.entity.Profile;
+import com.louter.collab.domain.profile.repository.ProfileRepository;
 import com.louter.collab.domain.team.entity.Team;
 import com.louter.collab.domain.team.dto.request.*;
 import com.louter.collab.domain.team.dto.response.TeamJoinRequestResponse;
@@ -25,6 +27,7 @@ public class TeamController {
 
     private final TeamService teamService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final ProfileRepository profileRepository;
 
     // 현재 로그인한 사용자 ID 가져오기 (토큰 기반, 불필요한 DB 조회 제거)
     private Long getCurrentUserId() {
@@ -176,8 +179,18 @@ public class TeamController {
     @GetMapping("/{teamId}/members")
     public ResponseEntity<List<TeamMemberResponse>> getTeamMembers(@PathVariable Long teamId) {
         var members = teamService.getTeamMembers(teamId);
+
+        List<Long> userIds = members.stream()
+                .map(m -> m.getUser().getUserId())
+                .toList();
+
+        Map<Long, String> profileImages = new java.util.HashMap<>();
+        profileRepository.findAllById(userIds).forEach(p ->
+                profileImages.put(p.getUserId(), p.getProfileImageUrl())
+        );
+
         var responses = members.stream()
-                .map(TeamMemberResponse::from)
+                .map(member -> TeamMemberResponse.from(member, profileImages.get(member.getUser().getUserId())))
                 .toList();
         return ResponseEntity.ok(responses);
     }
