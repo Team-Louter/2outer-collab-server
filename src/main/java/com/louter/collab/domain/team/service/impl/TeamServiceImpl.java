@@ -373,7 +373,7 @@ public class TeamServiceImpl implements TeamService {
     public List<Team> getRandomTeams(Long userId) {
         List<Team> teams = teamRepository.findRandomTeamsNotJoinedByUser(userId);
         List<Team> result = new ArrayList<>(teams);
-        while (result.size() < 16) {
+        while (result.size() < 18) {
             result.add(null);
         }
         return result;
