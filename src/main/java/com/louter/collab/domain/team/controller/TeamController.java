@@ -115,7 +115,7 @@ public class TeamController {
             @PathVariable Long teamId,
             @RequestBody TeamJoinRequestDto request) {
         Long userId = getCurrentUserId();
-        var joinRequest = teamService.requestJoinTeam(userId, teamId, request.getWorkUrl());
+        var joinRequest = teamService.requestJoinTeam(userId, teamId, request.getIntroduction(),request.getWorkUrl());
         return ResponseEntity.ok(TeamJoinRequestResponse.from(joinRequest));
     }
 

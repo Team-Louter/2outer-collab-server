@@ -120,7 +120,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public TeamJoinRequest requestJoinTeam(@NonNull Long userId, @NonNull Long teamId, String workUrl) {
+    public TeamJoinRequest requestJoinTeam(@NonNull Long userId, @NonNull Long teamId, String introduction, String workUrl) {
         // 유저 존재 확인
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
