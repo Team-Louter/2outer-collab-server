@@ -38,6 +38,8 @@ public class NoticeServiceImpl implements NoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new NoticeNotFoundException("해당 공지를 찾을 수 없습니다 : " + noticeId));
 
+        notice.update(request.getTitle(), request.getContent());
+
         return NoticeResponse.from(notice);
     }
 
@@ -49,7 +51,9 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public List<NoticeResponse> getNotices() {
-        return null;
+        return noticeRepository.findAll().stream()
+                .map(NoticeResponse::from)
+                .toList();
     }
 
 }
