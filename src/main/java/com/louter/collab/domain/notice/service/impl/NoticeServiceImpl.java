@@ -6,14 +6,11 @@ import com.louter.collab.domain.notice.dto.response.NoticeResponse;
 import com.louter.collab.domain.notice.entity.Notice;
 import com.louter.collab.domain.notice.repository.NoticeRepository;
 import com.louter.collab.domain.notice.service.NoticeService;
-import com.louter.collab.domain.todo.dto.response.TodoResponse;
 import com.louter.collab.global.common.exception.NoticeNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,9 +47,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public List<NoticeResponse> getNotices() {
-        return noticeRepository.findAll().stream()
-                .map(NoticeResponse::from)
-                .collect(Collectors.toList());
+        return null;
     }
 
 }

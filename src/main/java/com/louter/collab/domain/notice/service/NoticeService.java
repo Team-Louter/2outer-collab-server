@@ -13,5 +13,5 @@ public interface NoticeService {
 
     void deleteNotice(Long noticeId);
 
-    List<NoticeResponse> getTodos();
+    List<NoticeResponse> getNotices();
 }
