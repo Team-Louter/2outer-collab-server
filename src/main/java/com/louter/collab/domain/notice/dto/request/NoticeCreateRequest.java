@@ -10,6 +10,4 @@ public class NoticeCreateRequest {
 
     @NotNull
     private String content;
-
-
 }

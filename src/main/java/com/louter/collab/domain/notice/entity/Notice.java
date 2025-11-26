@@ -3,6 +3,7 @@ package com.louter.collab.domain.notice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -33,5 +34,9 @@ public class Notice {
     @CreationTimestamp
     @Column(name = "created_At", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_At", nullable = false)
+    private LocalDateTime updatedAt;
 
 }
