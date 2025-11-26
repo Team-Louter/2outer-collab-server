@@ -1,6 +1,6 @@
-package com.louter.collab.report.domain;
+package com.louter.collab.domain.report.domain;
 
-import com.louter.collab.team.domain.Team;
+import com.louter.collab.domain.team.entity.Team;
 import jakarta.persistence.*;
 import lombok.*;
 
