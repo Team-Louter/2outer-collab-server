@@ -1,10 +1,13 @@
 package com.louter.collab.domain.report.domain;
 
+import com.louter.collab.domain.page.entity.Page;
 import com.louter.collab.domain.team.entity.Team;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -12,7 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "repors")
+@Table(name = "report   s")
 public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,8 +25,13 @@ public class Report {
     @Column(name = "text", nullable = false)
     private String text;
 
-    @Column(name = "date", nullable = false)
-    private LocalDate date;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @OneToOne
+    @JoinColumn(name = "page_id")
+    private Page page;
 
     @ManyToOne
     @JoinColumn(name = "team_id", nullable = false)
