@@ -1,8 +1,6 @@
 package com.louter.collab.domain.notice.dto.response;
 
 import com.louter.collab.domain.notice.entity.Notice;
-import com.louter.collab.domain.todo.dto.response.TodoResponse;
-import com.louter.collab.domain.todo.entity.Todo;
 import lombok.Builder;
 import lombok.Getter;
 

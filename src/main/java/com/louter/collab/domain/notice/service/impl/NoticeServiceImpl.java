@@ -71,11 +71,10 @@ public class NoticeServiceImpl implements NoticeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("사용자 없음: " + userId));
 
-        if (noticeCheckRepository.existsByNoticeIdAndUserId(noticeId, userId)) {
+        if (noticeCheckRepository.existsByNoticeNoticeIdAndUserUserId(noticeId, userId)) {
             return;
         }
 
-        // 3. NoticeCheck 엔티티 생성 및 저장
         NoticeCheck check = NoticeCheck.builder()
                 .notice(notice)
                 .user(user)
