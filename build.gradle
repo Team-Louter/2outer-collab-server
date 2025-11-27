@@ -26,7 +26,14 @@ configurations {
 }
 
 repositories {
-    mavenCentral()
+	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }
+	maven { url 'https://repo.spring.io/snapshot' }
+}
+
+// Spring AI 버전 변수 설정
+ext {
+	set('springAiVersion', "1.0.0-M1")
 }
 
 dependencies {
@@ -78,6 +85,15 @@ dependencies {
 
 	// swagger 연결
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+
+	// openAI
+	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+	}
 }
 
 tasks.named('test') {

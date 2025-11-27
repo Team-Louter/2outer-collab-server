@@ -31,7 +31,7 @@ public class EmailServiceImpl implements EmailService {
             message.setFrom("ldy2009aa@gmail.com");
             message.setTo(request.getUserEmail());
             message.setSubject("[인증번호: " + code + "] Collab 이메일 인증을 진행해 주세요!");
-            message.setText("안녕하세요, [회원님 이름 또는 Collab 회원님]!\n" +
+            message.setText("안녕하세요, Collab 회원님!\n" +
                     "\n" +
                     "Collab 이메일 인증을 위한 코드를 보내드립니다.\n" +
                     "아래 인증 코드를 입력하여 이메일 인증을 완료해주세요.\n" +
