@@ -11,4 +11,5 @@ public interface NoticeService {
     NoticeResponse updateNotice(Long id, NoticeUpdateRequest request);
     void deleteNotice(Long id);
     List<NoticeResponse> getNotices();
+    void checkNotice(Long noticeId, Long userId);
 }
