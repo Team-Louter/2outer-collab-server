@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -34,6 +36,10 @@ public class Notice {
     @UpdateTimestamp
     @Column(name = "updated_At", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "notice", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<NoticeCheck> checks = new ArrayList<>();
 
     public void update(String title, String content) {
         this.title = title;
