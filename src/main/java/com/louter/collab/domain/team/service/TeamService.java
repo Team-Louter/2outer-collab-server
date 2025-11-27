@@ -58,6 +58,11 @@ public interface TeamService {
      * 팀 멤버 목록 조회
      */
     List<UserTeam> getTeamMembers(Long teamId);
+
+    /**
+     * 팀 멤버 수 조회
+     */
+    long getTeamMemberCount(Long teamId);
     
     /**
      * 팀 멤버의 권한 변경 (관리자만 가능)

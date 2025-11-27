@@ -60,6 +60,9 @@ public class TeamController {
 
         List<TeamResponse> responses = teams.stream()
                 .map(team -> {
+                    if (team == null) {
+                        return null;
+                    }
                     List<Long> chatRoomIds = teamService.getChatRoomIds(team.getTeamId());
                     return TeamResponse.from(team, chatRoomIds);
                 })
@@ -200,6 +203,13 @@ public class TeamController {
                 .map(member -> TeamMemberResponse.from(member, profileImages.get(member.getUser().getUserId())))
                 .toList();
         return ResponseEntity.ok(responses);
+    }
+
+    // 팀 멤버 수 조회
+    @GetMapping("/{teamId}/members/count")
+    public ResponseEntity<Map<String, Long>> getTeamMemberCount(@PathVariable Long teamId) {
+        long count = teamService.getTeamMemberCount(teamId);
+        return ResponseEntity.ok(Map.of("count", count));
     }
 
     // 팀 멤버 권한 변경
