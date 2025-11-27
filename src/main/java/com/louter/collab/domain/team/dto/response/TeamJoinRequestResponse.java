@@ -1,5 +1,7 @@
 package com.louter.collab.domain.team.dto.response;
 
+import com.louter.collab.domain.auth.entity.User;
+import com.louter.collab.domain.profile.entity.Profile;
 import com.louter.collab.domain.team.entity.TeamJoinRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,12 +23,24 @@ public class TeamJoinRequestResponse {
     private Long teamId;
     private String teamName;
     private String status;
+    private String introduction;
+    private String profilePicture;
     private String workUrl;
     private LocalDateTime createdAt;
     private LocalDateTime processedAt;
     private String processedByName;
 
     public static TeamJoinRequestResponse from(TeamJoinRequest request) {
+        String profileImageUrl = null;
+        User user = request.getUser();
+        if (user != null && user.getProfile() != null) {
+            profileImageUrl = user.getProfile().getProfileImageUrl();
+        }
+        return from(request, profileImageUrl);
+    }
+
+    // 2. [추가] 이미지 URL을 외부에서 주입받는 메서드 (생성용)
+    public static TeamJoinRequestResponse from(TeamJoinRequest request, String profilePicture) {
         return TeamJoinRequestResponse.builder()
                 .requestId(request.getRequestId())
                 .userId(request.getUser().getUserId())
@@ -35,10 +49,12 @@ public class TeamJoinRequestResponse {
                 .teamId(request.getTeam().getTeamId())
                 .teamName(request.getTeam().getTeamName())
                 .status(request.getStatus().name())
+                .introduction(request.getIntroduction())
+                .profilePicture(profilePicture)
                 .workUrl(request.getWorkUrl())
                 .createdAt(request.getCreatedAt())
                 .processedAt(request.getProcessedAt())
-                .processedByName(request.getProcessedBy() != null ? 
+                .processedByName(request.getProcessedBy() != null ?
                         request.getProcessedBy().getUserName() : null)
                 .build();
     }

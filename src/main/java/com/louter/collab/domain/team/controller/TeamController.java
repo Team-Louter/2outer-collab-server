@@ -117,9 +117,16 @@ public class TeamController {
     public ResponseEntity<TeamJoinRequestResponse> requestJoinTeam(
             @PathVariable("teamId") Long teamId,
             @RequestBody TeamJoinRequestDto request) {
+
         Long userId = getCurrentUserId();
-        var joinRequest = teamService.requestJoinTeam(userId, teamId, request.getIntroduction(),request.getWorkUrl());
-        return ResponseEntity.ok(TeamJoinRequestResponse.from(joinRequest));
+        TeamJoinRequestResponse response = teamService.requestJoinTeam(
+                userId,
+                teamId,
+                request.getIntroduction(),
+                request.getWorkUrl()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     // 팀 가입 신청 승인/거절

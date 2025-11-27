@@ -11,9 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TeamJoinRequestDto {
-//
-//    @NotNull
-//    private Long teamId;
 
     @NotNull
     private String introduction;
