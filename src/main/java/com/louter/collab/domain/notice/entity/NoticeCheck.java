@@ -31,11 +31,11 @@ public class NoticeCheck {
     private User user;
 
     @CreationTimestamp
-    @Column(name = "checked_created_At", nullable = false, updatable = false)
+    @Column(name = "checked_created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "checked_updated_At", nullable = true)
+    @Column(name = "checked_updated_at", nullable = true)
     private LocalDateTime updatedAt;
 
     @Builder
