@@ -2,7 +2,7 @@ package com.louter.collab.domain.report.service.impl;
 
 import com.louter.collab.domain.page.entity.PageBlock;
 import com.louter.collab.domain.report.dto.response.ReportResponse;
-import com.louter.collab.domain.report.repository.PageBlockRepository;
+import com.louter.collab.domain.report.repository.ReportRepository;
 import com.louter.collab.domain.report.service.ReportService;
 import com.louter.collab.global.common.exception.EmptyContentException;
 import com.louter.collab.global.common.exception.EmptyPageBlockException;
@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
-    private final PageBlockRepository pageBlockRepository;
+    private final ReportRepository reportRepository;
     private final ChatModel chatModel;
 
     @Override
     public ReportResponse summarizePage(Long pageId) {
         // index순으로 조회
-        List<PageBlock> blocks = pageBlockRepository.findByPageIdOrderByOrderIndexAsc(pageId);
+        List<PageBlock> blocks = reportRepository.findByPageIdOrderByOrderIndexAsc(pageId);
         if (blocks.isEmpty()) {
             throw new EmptyPageBlockException("해당 페이지의 블록이 존재하지 않습니다");
         }
