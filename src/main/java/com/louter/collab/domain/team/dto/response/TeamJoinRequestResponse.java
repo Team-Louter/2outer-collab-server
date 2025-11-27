@@ -1,5 +1,6 @@
 package com.louter.collab.domain.team.dto.response;
 
+import com.louter.collab.domain.profile.entity.Profile;
 import com.louter.collab.domain.team.entity.TeamJoinRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,8 @@ public class TeamJoinRequestResponse {
     private Long teamId;
     private String teamName;
     private String status;
+    private String introduction;
+    private Profile profilePicture;
     private String workUrl;
     private LocalDateTime createdAt;
     private LocalDateTime processedAt;
@@ -35,6 +38,8 @@ public class TeamJoinRequestResponse {
                 .teamId(request.getTeam().getTeamId())
                 .teamName(request.getTeam().getTeamName())
                 .status(request.getStatus().name())
+                .introduction(request.getIntroduction())
+                .profilePicture(request.getProfilePicture())
                 .workUrl(request.getWorkUrl())
                 .createdAt(request.getCreatedAt())
                 .processedAt(request.getProcessedAt())

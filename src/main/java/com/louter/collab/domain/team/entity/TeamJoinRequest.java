@@ -1,6 +1,7 @@
 package com.louter.collab.domain.team.entity;
 
 import com.louter.collab.domain.auth.entity.User;
+import com.louter.collab.domain.profile.entity.Profile;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,6 +34,9 @@ public class TeamJoinRequest {
     @Column(name = "status", nullable = false, length = 20)
     private RequestStatus status;
 
+    @Column(name = "introduction")
+    private String introduction;
+
     @Column(name = "work_url")
     private String workUrl;
 
@@ -46,6 +50,10 @@ public class TeamJoinRequest {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "processed_by")
     private User processedBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_picture", nullable = false)
+    private Profile profilePicture;
 
     public enum RequestStatus {
         PENDING,   // 대기 중
