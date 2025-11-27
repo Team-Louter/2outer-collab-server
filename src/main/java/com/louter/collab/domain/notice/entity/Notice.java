@@ -27,10 +27,6 @@ public class Notice {
     @Column(name = "content", columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @Column(name = "check")
-    @Builder.Default
-    private Boolean check = false;
-
     @CreationTimestamp
     @Column(name = "created_At", nullable = false, updatable = false)
     private LocalDateTime createdAt;

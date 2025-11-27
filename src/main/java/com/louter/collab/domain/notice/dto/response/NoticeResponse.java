@@ -23,7 +23,6 @@ public class NoticeResponse {
                 .noticeId(notice.getNoticeId())
                 .title(notice.getTitle())
                 .content(notice.getContent())
-                .check(notice.getCheck())
                 .createdAt(notice.getCreatedAt())
                 .updatedAt(notice.getUpdatedAt())
                 .build();
