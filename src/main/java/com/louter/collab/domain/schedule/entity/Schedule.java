@@ -1,5 +1,6 @@
 package com.louter.collab.domain.schedule.entity;
 
+import com.louter.collab.domain.auth.entity.User;
 import com.louter.collab.domain.team.entity.Team;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,4 +37,8 @@ public class Schedule {
     @ManyToOne
     @JoinColumn(name = "team_id", nullable = false)
     private Team team;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;  // 스케줄 작성자
 }

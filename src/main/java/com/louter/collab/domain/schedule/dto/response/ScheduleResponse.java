@@ -18,8 +18,9 @@ public class ScheduleResponse {
     private String scheduleContent;
     private LocalDateTime scheduleDate;
     private Color color;
+    private String userName;
 
-    public static ScheduleResponse from(Schedule schedule) {
+    public static ScheduleResponse from(Schedule schedule, String userName) {
         return ScheduleResponse.builder()
                 .scheduleId(schedule.getScheduleId())
                 .teamId(schedule.getTeam().getTeamId())
@@ -27,6 +28,11 @@ public class ScheduleResponse {
                 .scheduleContent(schedule.getScheduleContent())
                 .scheduleDate(schedule.getScheduleDate())
                 .color(schedule.getScheduleColor())
+                .userName(userName)
                 .build();
+    }
+
+    public static ScheduleResponse from(Schedule schedule) {
+        return from(schedule, null);
     }
 }

@@ -1,5 +1,6 @@
 package com.louter.collab.domain.team.service;
 
+import com.louter.collab.domain.team.dto.response.TeamJoinRequestResponse;
 import com.louter.collab.domain.team.entity.UserTeam;
 import com.louter.collab.domain.team.entity.Team;
 import com.louter.collab.domain.team.entity.TeamJoinRequest;
@@ -21,7 +22,7 @@ public interface TeamService {
     /**
      * 팀 가입 신청
      */
-    TeamJoinRequest requestJoinTeam(Long userId, Long teamId, String workUrl);
+    TeamJoinRequestResponse requestJoinTeam(Long userId, Long teamId, String introduction, String workUrl);
     
     /**
      * 팀 가입 신청 승인/거절 (관리자만 가능)
@@ -57,6 +58,11 @@ public interface TeamService {
      * 팀 멤버 목록 조회
      */
     List<UserTeam> getTeamMembers(Long teamId);
+
+    /**
+     * 팀 멤버 수 조회
+     */
+    long getTeamMemberCount(Long teamId);
     
     /**
      * 팀 멤버의 권한 변경 (관리자만 가능)

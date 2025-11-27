@@ -1,6 +1,8 @@
 package com.louter.collab.domain.team.controller;
 
 import com.louter.collab.domain.auth.jwt.JwtTokenProvider;
+import com.louter.collab.domain.profile.entity.Profile;
+import com.louter.collab.domain.profile.repository.ProfileRepository;
 import com.louter.collab.domain.team.entity.Team;
 import com.louter.collab.domain.team.dto.request.*;
 import com.louter.collab.domain.team.dto.response.TeamJoinRequestResponse;
@@ -25,6 +27,7 @@ public class TeamController {
 
     private final TeamService teamService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final ProfileRepository profileRepository;
 
     // 현재 로그인한 사용자 ID 가져오기 (토큰 기반, 불필요한 DB 조회 제거)
     private Long getCurrentUserId() {
@@ -57,6 +60,9 @@ public class TeamController {
 
         List<TeamResponse> responses = teams.stream()
                 .map(team -> {
+                    if (team == null) {
+                        return null;
+                    }
                     List<Long> chatRoomIds = teamService.getChatRoomIds(team.getTeamId());
                     return TeamResponse.from(team, chatRoomIds);
                 })
@@ -109,11 +115,18 @@ public class TeamController {
     // 팀 가입 신청
     @PostMapping("/{teamId}/join-request")
     public ResponseEntity<TeamJoinRequestResponse> requestJoinTeam(
-            @PathVariable Long teamId,
+            @PathVariable("teamId") Long teamId,
             @RequestBody TeamJoinRequestDto request) {
+
         Long userId = getCurrentUserId();
-        var joinRequest = teamService.requestJoinTeam(userId, teamId, request.getWorkUrl());
-        return ResponseEntity.ok(TeamJoinRequestResponse.from(joinRequest));
+        TeamJoinRequestResponse response = teamService.requestJoinTeam(
+                userId,
+                teamId,
+                request.getIntroduction(),
+                request.getWorkUrl()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     // 팀 가입 신청 승인/거절
@@ -176,10 +189,27 @@ public class TeamController {
     @GetMapping("/{teamId}/members")
     public ResponseEntity<List<TeamMemberResponse>> getTeamMembers(@PathVariable Long teamId) {
         var members = teamService.getTeamMembers(teamId);
+
+        List<Long> userIds = members.stream()
+                .map(m -> m.getUser().getUserId())
+                .toList();
+
+        Map<Long, String> profileImages = new java.util.HashMap<>();
+        profileRepository.findAllById(userIds).forEach(p ->
+                profileImages.put(p.getUserId(), p.getProfileImageUrl())
+        );
+
         var responses = members.stream()
-                .map(TeamMemberResponse::from)
+                .map(member -> TeamMemberResponse.from(member, profileImages.get(member.getUser().getUserId())))
                 .toList();
         return ResponseEntity.ok(responses);
+    }
+
+    // 팀 멤버 수 조회
+    @GetMapping("/{teamId}/members/count")
+    public ResponseEntity<Map<String, Long>> getTeamMemberCount(@PathVariable Long teamId) {
+        long count = teamService.getTeamMemberCount(teamId);
+        return ResponseEntity.ok(Map.of("count", count));
     }
 
     // 팀 멤버 권한 변경

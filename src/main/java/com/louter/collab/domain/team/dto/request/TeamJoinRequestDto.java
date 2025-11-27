@@ -13,7 +13,7 @@ import lombok.Setter;
 public class TeamJoinRequestDto {
 
     @NotNull
-    private Long teamId;
-    
+    private String introduction;
+
     private String workUrl;
 }

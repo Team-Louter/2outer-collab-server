@@ -4,10 +4,10 @@ import com.louter.collab.domain.auth.entity.User;
 import com.louter.collab.domain.auth.repository.UserRepository;
 import com.louter.collab.domain.chat.entity.ChatRoom;
 import com.louter.collab.domain.chat.repository.ChatRoomRepository;
-import com.louter.collab.global.common.exception.IllegalArgumentException;
-import com.louter.collab.global.common.exception.TeamNotFoundException;
-import com.louter.collab.global.common.exception.RoleNotFoundException;
-import com.louter.collab.global.common.exception.UserNotFoundException;
+import com.louter.collab.domain.profile.entity.Profile;
+import com.louter.collab.domain.profile.repository.ProfileRepository;
+import com.louter.collab.domain.team.dto.response.TeamJoinRequestResponse;
+import com.louter.collab.global.common.exception.*;
 import com.louter.collab.domain.role.entity.Permission;
 import com.louter.collab.domain.role.entity.Role;
 import com.louter.collab.domain.role.service.RoleService;
@@ -19,6 +19,7 @@ import com.louter.collab.domain.team.repository.TeamJoinRequestRepository;
 import com.louter.collab.domain.team.repository.TeamRepository;
 import com.louter.collab.domain.team.repository.UserTeamRepository;
 import com.louter.collab.domain.team.service.TeamService;
+import com.louter.collab.global.common.exception.IllegalArgumentException;
 import lombok.RequiredArgsConstructor;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ public class TeamServiceImpl implements TeamService {
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final ChatRoomRepository chatRoomRepository;
+    private final ProfileRepository profileRepository;
 
     @Override
     @Transactional
@@ -120,7 +122,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     @Transactional
-    public TeamJoinRequest requestJoinTeam(@NonNull Long userId, @NonNull Long teamId, String workUrl) {
+    public TeamJoinRequestResponse requestJoinTeam(@NonNull Long userId, @NonNull Long teamId, String introduction, String workUrl) {
         // 유저 존재 확인
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
@@ -128,6 +130,10 @@ public class TeamServiceImpl implements TeamService {
         // 팀 존재 확인
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException("팀을 찾을 수 없습니다."));
+
+        // 프로필 존재 확인
+        Profile profile = profileRepository.findById(userId)
+                .orElseThrow(() -> new ProfileNotFoundException("프로필을 찾을 수 없습니다."));
 
         // 이미 가입되어 있는지 확인
         if (userTeamRepository.existsByUser_UserIdAndTeam_TeamId(userId, teamId)) {
@@ -145,10 +151,13 @@ public class TeamServiceImpl implements TeamService {
                 .user(user)
                 .team(team)
                 .status(TeamJoinRequest.RequestStatus.PENDING)
+                .introduction(introduction)
                 .workUrl(workUrl)
                 .build();
 
-        return teamJoinRequestRepository.save(joinRequest);
+        TeamJoinRequest savedJoinRequest = teamJoinRequestRepository.save(joinRequest);
+
+        return TeamJoinRequestResponse.from(savedJoinRequest, profile.getProfileImageUrl());
     }
 
     @Override
@@ -293,6 +302,16 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    public long getTeamMemberCount(@NonNull Long teamId) {
+        // 팀 존재 확인
+        if (!teamRepository.existsById(teamId)) {
+            throw new TeamNotFoundException("팀을 찾을 수 없습니다.");
+        }
+
+        return userTeamRepository.countByTeam_TeamId(teamId);
+    }
+
+    @Override
     @Transactional
     public void changeMemberRole(@NonNull Long adminUserId, @NonNull Long teamId, @NonNull Long targetUserId, @NonNull Long newRoleId) {
         // 팀 존재 확인
@@ -373,7 +392,7 @@ public class TeamServiceImpl implements TeamService {
     public List<Team> getRandomTeams(Long userId) {
         List<Team> teams = teamRepository.findRandomTeamsNotJoinedByUser(userId);
         List<Team> result = new ArrayList<>(teams);
-        while (result.size() < 16) {
+        while (result.size() < 18) {
             result.add(null);
         }
         return result;
