@@ -51,10 +51,6 @@ public class TeamJoinRequest {
     @JoinColumn(name = "processed_by")
     private User processedBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "profile_picture", nullable = false)
-    private Profile profilePicture;
-
     public enum RequestStatus {
         PENDING,   // 대기 중
         APPROVED,  // 승인됨
