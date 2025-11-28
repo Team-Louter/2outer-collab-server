@@ -33,7 +33,7 @@ repositories {
 
 // Spring AI 버전 변수 설정
 ext {
-	set('springAiVersion', "1.0.0-M1")
+	set('springAiVersion', "1.0.0-SNAPSHOT")
 }
 
 dependencies {
