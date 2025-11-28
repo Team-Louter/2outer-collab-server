@@ -33,7 +33,7 @@ repositories {
 
 // Spring AI 버전 변수 설정
 ext {
-	set('springAiVersion', "1.1.0")
+	set('springAiVersion', "1.0.0-M4")
 }
 
 dependencies {
@@ -88,6 +88,11 @@ dependencies {
 
 	// openAI
 	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+
+	// Test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
@@ -98,4 +103,9 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+	archiveBaseName.set('collab')
+	archiveVersion.set('')
 }
